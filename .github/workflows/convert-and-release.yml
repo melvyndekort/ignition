@@ -22,16 +22,21 @@ jobs:
           fileName: "butane-x86_64-unknown-linux-gnu"
           out-file-path: "bin"
 
-      - name: Convert
+      - name: Convert .bu files
         run: |
           chmod +x bin/*
           mkdir dist
           for FILE in src/*.bu; do
-            bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > dist/$(basename $FILE | sed 's/.bu$/.ign/')
+            IGN="$(basename $FILE | sed 's/.bu$/.ign/')"
+            bin/butane-x86_64-unknown-linux-gnu --pretty --strict "$FILE" > "dist/$IGN"
           done
 
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v3
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          name: ignition-files
-          path: dist/*.ign
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: "ignition-mdekort-nl"
+          directory: "dist/"
+          # Optional: Enable this if you want to have GitHub Deployments triggered
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
