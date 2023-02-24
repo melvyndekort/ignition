@@ -22,6 +22,7 @@ jobs:
           out-file-path: "bin"
 
       - run: |
+          mkdir target
           for FILE in src/*.bu; do
             bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > target/$(basename $FILE | sed 's/.bu$/.ign/')
           done
