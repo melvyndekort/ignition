@@ -14,16 +14,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - uses: robinraju/release-downloader@v1.7
+      - name: Download butane
+        uses: robinraju/release-downloader@v1.7
         with:
           repository: "coreos/butane"
           latest: true
           fileName: "butane-x86_64-unknown-linux-gnu"
           out-file-path: "bin"
 
-      - run: |
+      - name: Convert
+        run: |
           chmod +x bin/*
-          mkdir target
+          mkdir dist
           for FILE in src/*.bu; do
-            bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > target/$(basename $FILE | sed 's/.bu$/.ign/')
+            bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > dist/$(basename $FILE | sed 's/.bu$/.ign/')
           done
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ignition-files
+          path: dist/*.ign
