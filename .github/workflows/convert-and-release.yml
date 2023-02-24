@@ -23,5 +23,5 @@ jobs:
 
       - run: |
           for FILE in src/*.bu; do
-            bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > target/$(basename $FILE | sed 's/.bu$/.ign')
+            bin/butane-x86_64-unknown-linux-gnu --pretty --strict $FILE > target/$(basename $FILE | sed 's/.bu$/.ign/')
           done
