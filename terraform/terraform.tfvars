@@ -1,5 +1,0 @@
-name        = "ignition-mdekort-nl"
-domain_name = "ignition.mdekort.nl"
-repo_owner  = "melvyndekort"
-repo_name   = "ignition"
-repo_branch = "main"
