@@ -53,10 +53,13 @@ systemd:
       enabled: false
       contents: |
         [Unit]
-        Description=Scrub BTRFS storage filesystem, check volume for errors
+        Description=Scrub a BTRFS filesystem, check volume for errors
 
         [Service]
-        ExecStart=/usr/sbin/btrfs scrub start /dev/disk/by-label/storage
+        Nice=19
+        IOSchedulingClass=idle
+        KillSignal=SIGINT
+        ExecStart=/usr/sbin/btrfs scrub start -B /dev/disk/by-label/storage
     - name: btrfs-scrub.timer
       enabled: true
       contents: |
@@ -65,7 +68,8 @@ systemd:
 
         [Timer]
         OnCalendar=monthly
-        AccuracySec=12h
+        AccuracySec=1d
+        RandomizedDelaySec=1w
         Persistent=true
 
         [Install]
