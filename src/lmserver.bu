@@ -49,31 +49,27 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    - name: scrubber.service
+    - name: btrfs-scrub.service
       enabled: false
       contents: |
         [Unit]
-        Description=btrfs scrub of the storage filesystem
+        Description=Scrub BTRFS storage filesystem, check volume for errors
 
         [Service]
-        ExecStart=btrfs scrub start -Bd /dev/disk/by-label/storage
-
-        [Install]
-        WantedBy=multi-user.target
-    - name: scrubber.timer
+        ExecStart=/usr/sbin/btrfs scrub start -c3 -d /dev/disk/by-label/storage
+    - name: btrfs-scrub.timer
       enabled: true
       contents: |
         [Unit]
-        Description=Scrubber service timer
+        Description=Trigger BTRFS scrub on storage filesystem
 
         [Timer]
         OnCalendar=monthly
         AccuracySec=12h
         Persistent=true
-        Unit=scrubber.service
 
         [Install]
-        WantedBy=basic.target
+        WantedBy=timers.target
     - name: docker.service
       enabled: true
     - name: portainer.service
