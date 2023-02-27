@@ -16,6 +16,20 @@ storage:
       mode: 0644
       contents:
         inline: lmserver
+    - path: /etc/zincati/config.d/51-rollout-wariness.toml
+      contents:
+        inline: |
+          [identity]
+          rollout_wariness = 0.2
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+          [[updates.periodic.window]]
+          days = [ "Sat", "Sun" ]
+          start_time = "06:00"
+          length_minutes = 60
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -36,7 +50,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
     - name: scrubber.service
-      enabled: true
+      enabled: false
       contents: |
         [Unit]
         Description=btrfs scrub of the storage filesystem
