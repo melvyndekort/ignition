@@ -56,7 +56,7 @@ systemd:
         Description=Scrub BTRFS storage filesystem, check volume for errors
 
         [Service]
-        ExecStart=/usr/sbin/btrfs scrub start -c3 -d /dev/disk/by-label/storage
+        ExecStart=/usr/sbin/btrfs scrub start /dev/disk/by-label/storage
     - name: btrfs-scrub.timer
       enabled: true
       contents: |
