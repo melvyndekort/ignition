@@ -30,9 +30,16 @@ storage:
           days = [ "Sat", "Sun" ]
           start_time = "06:00"
           length_minutes = 60
+    - path: /etc/systemd/resolved.conf
+      contents:
+        inline: |
+          [Resolve]
+          DNSStubListener=no
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
+    - path: /etc/resolv.conf
+      target: /run/systemd/resolve/resolv.conf
 systemd:
   units:
     - name: docker.service
