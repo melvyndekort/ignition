@@ -35,11 +35,17 @@ storage:
         inline: |
           [Resolve]
           DNSStubListener=no
+    - path: /etc/resolv.conf.manual
+      contents:
+        inline: |
+          search mdekort.lan
+          nameserver 10.204.0.1
+          nameserver 2a02:a45b:51f6:100::1
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
     - path: /etc/resolv.conf
-      target: /run/systemd/resolve/resolv.conf
+      target: /etc/resolv.conf.manual
 systemd:
   units:
     - name: docker.service
