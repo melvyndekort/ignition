@@ -1,12 +1,10 @@
 name: "Terraform"
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-    paths:
-      - '**.tf'
-      - '**.tfvars'
   pull_request:
 
 permissions:
