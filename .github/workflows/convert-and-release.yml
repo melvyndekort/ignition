@@ -1,8 +1,12 @@
+name: 'Convert and Release'
+
 on:
+  workflow_dispatch:
   push:
     branches:
-      - 'main'
+      - main
     paths:
+      - '.github/workflows/convert-and-release.yml'
       - '**.bu'
 
 jobs:

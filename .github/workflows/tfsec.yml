@@ -1,12 +1,16 @@
 name: tfsec
+
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
     paths:
+      - '.github/workflows/tfsec.yml'
       - '**.tf'
       - '**.tfvars'
   pull_request:
+
 jobs:
   tfsec:
     name: tfsec sarif report
