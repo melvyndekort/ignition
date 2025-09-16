@@ -20,15 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download butane
-        uses: robinraju/release-downloader@v1.12
-        with:
-          repository: "coreos/butane"
-          latest: true
-          fileName: "butane-x86_64-unknown-linux-gnu"
-          out-file-path: "bin"
+        run: |
+          mkdir -p bin
+          gh release download --repo coreos/butane --pattern "butane-x86_64-unknown-linux-gnu" --dir bin
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Convert .bu files
         run: |
-          chmod +x bin/*
+          chmod +x bin/butane-x86_64-unknown-linux-gnu
           mkdir dist
           for FILE in src/*.bu; do
             IGN="$(basename $FILE | sed 's/.bu$/.ign/')"
