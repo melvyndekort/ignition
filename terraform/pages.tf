@@ -6,6 +6,13 @@ resource "cloudflare_pages_project" "site" {
   account_id        = local.cloudflare_account_id
   name              = var.name
   production_branch = var.repo_branch
+
+  lifecycle {
+    ignore_changes = [
+      build_config,
+      deployment_configs,
+    ]
+  }
 }
 
 resource "cloudflare_pages_domain" "site" {
