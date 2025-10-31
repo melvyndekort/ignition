@@ -1,0 +1,265 @@
+variant: fiot
+version: 1.0.0
+passwd:
+  users:
+    - name: core
+      groups:
+        - wheel
+      password_hash: "$6$ap2KrVdWE6eHy/6B$vMtfp2m460/zaxgWtwKir7BssW0huVqxeVmIzs6cfD0B7iZOC7fFLNPIjKl0q1cxY1RUQJDgm5A.KuWGmEC1P0"
+      ssh_authorized_keys:
+      - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4=
+      - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA==
+
+storage:
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: pihole-1
+    - path: /etc/rpm-ostreed.conf
+      overwrite: true
+      contents:
+        inline: |
+          [Daemon]
+          AutomaticUpdatePolicy=apply
+          AutomaticUpdateTrigger=ex-stage,idle-timer
+          IdleExitTimeout=60
+    - path: /etc/systemd/system/rpm-ostreed-automatic.timer.d/override.conf
+      contents:
+        inline: |
+          [Timer]
+          OnCalendar=
+          OnCalendar=Sat,Sun 04:00
+          RandomizedDelaySec=7200
+    - path: /etc/systemd/journald.conf.d/volatile.conf
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          Compress=yes
+          RuntimeMaxUse=100M
+          RuntimeMaxFileSize=10M
+    - path: /etc/systemd/resolved.conf
+      contents:
+        inline: |
+          [Resolve]
+          DNSStubListener=no
+    - path: /etc/resolv.conf.manual
+      contents:
+        inline: |
+          search mdekort.lan
+          nameserver 10.204.10.1
+
+    - path: /var/containers/unbound/unbound.conf
+      mode: 0644
+      user:
+        name: core
+      group:
+        name: core
+      contents:
+        inline: |
+          server:
+              # can be uncommented if you do not need user privilege protection
+              username: "unbound"
+
+              # send minimal amount of information to upstream servers to enhance privacy
+              qname-minimisation: yes
+
+              # specify the interface to answer queries from by ip-address.
+              interface: 0.0.0.0@5335
+
+              # addresses from the IP range that are allowed to connect to the resolver
+              access-control: 0.0.0.0/0 allow
+    - path: /etc/systemd/zram-generator.conf
+      contents:
+        inline: |
+          [zram0]
+          zram-size = ram / 2
+          compression-algorithm = lz4
+  directories:
+    - { path: /var/containers/unbound, mode: 0755, user: {name: core}, group: {name: core} }
+    - { path: /var/containers/pihole, mode: 0755, user: {name: core}, group: {name: core} }
+    - { path: /var/containers/dnsmasq, mode: 0755, user: {name: core}, group: {name: core} }
+    - { path: /var/containers/cloudflared, mode: 0755, user: {name: root}, group: {name: root} }
+  links:
+    - path: /etc/resolv.conf
+      target: /etc/resolv.conf.manual
+      overwrite: true
+    - path: /etc/localtime
+      target: /usr/share/zoneinfo/Europe/Amsterdam
+systemd:
+  units:
+    - name: podman-auto-update.timer
+      enabled: true
+    - name: rpm-ostreed-automatic.timer
+      enabled: true
+    - name: bluetooth.service
+      enabled: false
+      mask: true
+    - name: ModemManager.service
+      enabled: false
+      mask: true
+    - name: container-unbound.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-unbound.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+        	--cidfile=%t/%n.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=unbound \
+        	-d \
+                --net=host \
+                --tmpfs /tmp \
+                --tmpfs /var/tmp \
+                --health-cmd="nc -z 127.0.0.1 5335 || exit 1" \
+                --health-interval=30s \
+                --health-retries=3 \
+                -v /var/containers/unbound:/etc/unbound:Z \
+                --label io.containers.autoupdate=registry \
+                docker.io/alpinelinux/unbound:latest
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: container-pihole.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-pihole.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+        Requires=container-unbound.service
+        After=container-unbound.service
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+        	--cidfile=%t/%n.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=pihole \
+        	-d \
+        	-e TZ=Europe/Amsterdam \
+        	-e VIRTUAL_HOST=pihole-1.mdekort.lan \
+                -e DNSMASQ_USER=pihole \
+        	-e SKIPGRAVITYONBOOT=1 \
+        	--tmpfs /tmp \
+        	--tmpfs /var/tmp \
+        	--health-cmd="dig @127.0.0.1 google.com || exit 1" \
+        	--health-interval=30s \
+        	--health-retries=3 \
+        	-v /var/containers/pihole:/etc/pihole:Z \
+        	-v /var/containers/dnsmasq:/etc/dnsmasq.d:Z \
+                --net=host \
+                --label io.containers.autoupdate=registry \
+        	--hostname pihole-1 \
+                docker.io/pihole/pihole:latest
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: configure-firewall.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Configure firewall for Pihole
+        After=firewalld.service
+        Wants=firewalld.service
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/firewall-cmd --permanent --add-port=53/tcp --add-port=53/udp --add-port=80/tcp --add-port=443/tcp
+        ExecStart=/usr/bin/firewall-cmd --reload
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: container-cloudflared.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-cloudflared.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+        	--cidfile=%t/%n.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=cloudflared \
+        	-d \
+        	-e TZ=Europe/Amsterdam \
+        	--tmpfs /tmp \
+        	--tmpfs /var/tmp \
+        	-v /var/containers/cloudflared:/etc/cloudflared:Z \
+        	--net=host \
+        	--label io.containers.autoupdate=registry \
+        	docker.io/cloudflare/cloudflared:latest tunnel run --token-file /etc/cloudflared/tunnel-token
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
