@@ -11,6 +11,10 @@ passwd:
       - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA==
 
 storage:
+  filesystems:
+    - device: /dev/disk/by-label/root
+      format: ext4
+      resize: true
   files:
     - path: /etc/hostname
       mode: 0644
