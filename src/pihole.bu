@@ -50,6 +50,11 @@ storage:
         inline: |
           search mdekort.lan
           nameserver 10.204.10.1
+    - path: /etc/hosts
+      mode: 0644
+      append:
+        - inline: |
+            10.204.10.2 lmserver.mdekort.nl
 
     - path: /var/containers/unbound/unbound.conf
       mode: 0644
@@ -82,6 +87,7 @@ storage:
     - { path: /var/containers/pihole, mode: 0755, user: {name: core}, group: {name: core} }
     - { path: /var/containers/dnsmasq, mode: 0755, user: {name: core}, group: {name: core} }
     - { path: /var/containers/cloudflared, mode: 0755, user: {name: root}, group: {name: root} }
+    - { path: /var/containers/beszel_agent, mode: 0755, user: {name: root}, group: {name: root} }
   links:
     - path: /etc/resolv.conf
       target: /etc/resolv.conf.manual
@@ -251,6 +257,55 @@ systemd:
         	--net=host \
         	--label io.containers.autoupdate=registry \
         	docker.io/cloudflare/cloudflared:latest tunnel run --token-file /etc/cloudflared/tunnel-token
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: container-beszel-agent.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-beszel-agent.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+        	--cidfile=%t/%n.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=beszel-agent \
+        	-d \
+        	-e TZ=Europe/Amsterdam \
+                -e LISTEN=45876 \
+                -e "KEY=CHANGEME" \
+                -e TOKEN=CHANGEME \
+                -e HUB_URL=https://lmserver.mdekort.nl/beszel \
+        	--tmpfs /tmp \
+        	--tmpfs /var/tmp \
+        	-v /var/containers/beszel_agent:/var/lib/beszel-agent:Z \
+        	--net=host \
+        	--label io.containers.autoupdate=registry \
+        	docker.io/henrygd/beszel-agent:latest
         ExecStop=/usr/bin/podman stop \
         	--ignore -t 10 \
         	--cidfile=%t/%n.ctr-id
