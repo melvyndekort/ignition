@@ -1,28 +1,31 @@
 variant: fcos
-version: 1.4.0
+version: 1.5.0
 passwd:
   users:
     - name: core
+      password_hash: "$6$ap2KrVdWE6eHy/6B$vMtfp2m460/zaxgWtwKir7BssW0huVqxeVmIzs6cfD0B7iZOC7fFLNPIjKl0q1cxY1RUQJDgm5A.KuWGmEC1P0"
       ssh_authorized_keys:
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMFJhPTPfNQuNCuz9AESupcGOwLtg8Xp+qTnv2+qU94O
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCuyHMuKWZIxf63X1Ve6nU6+D/Ku+Y6c2pC8OYMDbzQrxr1AQCvoxP/zVimLbl4cur66GXE3RqcRH6UHC1q6YR2vlWBcZvDlojnHWRmqvcFlsuv7RxdF5DVatzrfQ6l1m0jy+Ey3djBGKwH5fIxKTpMZVkERFXYSNDLwyMqTisbBI9e32nOHFeG5dcH6mdloAyICbdMnDTn5pl1ztjEOqZ+TKtv0ZEf4o0iHMCKFwJBJnJ2OGTqNycjt6VeTPaMdpGetfCxCuA7lmdGV6IoooEkxKTp9J1+DBmTTGgo1ivfb6EZVSL6EQysieL+eYhcASKkiKaoQOylqysHbk49TJUBMX2H3yLq9N80h6dhDjtdWtCpuaD0KKpnxF5J3agi9z2gywVgzv38hik2ApE1T0ny/ZtwnnXOw3sNMaS6yBp9yw/KqsuKBrSqDYufqQbsce/sAjzR4B4ELauvol0AvlK+5gSDTZoDI6VgbOyJkFVFZbkOqAXTZZ/cBPJ8+ZzSBsNjW6YHvl7mJsdi9ZuUT2OhH2CKF3+rcVaBBcdzMqSMcwUWYf5J4n7yTleCuPau+klkHzM+QbHEPN+65dSqdk0nwgSiwK0OaalHuYNVlNPyji1lkLVLFwsgpE7lIpRxPrYOI6fVY/Fo0EhW3oIktvyohKRF1TaISsILRr2m/b7VLQ==
-      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCse8TLb47f+zddmzm0EvO6+RK8eeQouClEFA33ftG6+ioiJxkNf+vXwtWVlmA4JzwhLDQ5tKk+SQ9OTg/JMB8O9VfaK9LHxhJhLdiNo+P8W/vK9BI6CNCA1F+rbzN3OtEavYum7eHxeUrnYM+VkGyUpi5zmbHYF30VgxYeLMoK66eriFo+EHoQwv137uUgGYxe1BLGwkHjWdZ6wgjPkZTu4QoAsdxptVZH16TsFJKEQJdetJbJQ+I86yPjZ4AU5ImzdWUbUA4ic8gIZDhZeLz2UCmRB/EilNVKzQb+m54rE+cRH7f63zcEkqnAb5Ugz+XRMtdtqxcx2x9Eza2ohk8ZblyE8s3D2c4KR4YKzZJhuakK/sQ9FKOJo6vy2G6Mq1PMUhMF3rn+whUzXBpV2A0XK8P0H7/D+7zsGnQH+NZb6akgE+SqonL+zK430xWhWvoE7irtPh9CeG8+AF9OD+nbGBs22HpXCeR+yW2tPfJQtHLBOkaWyzJIsqfl4cMWaCRMnRKl/QEJuu9dG3rtOcZyBvkBnKd0X1GNIN5t1BMuhKghkipBgrG2oMM3hBRafHafrg26ikIImuImqVvaWZWeKKjU5tsivu/PELa4vyF/PqJ7meFqf1V2Jpw2Z21nSVQsgXK34Kbx5r6GSIdea+9cdEsJabKS7VrqwmSY8NjCZQ==
-      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHeSNxaHLaTr/8VMYRiKzzORR1mnJmkJqN8yCXhQ3V6N
-kernel_arguments:
-  should_exist:
-    - selinux=0
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4= yubikey-main
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
 storage:
+  directories:
+    - path: /srv
+      mode: 0755
+      overwrite: true
+    - path: /srv/primary
+      mode: 0755
+    - path: /srv/primary/docker/portainer
+      mode: 0755
+    - path: /var/swap
+      mode: 0755
   files:
+    # System configuration
     - path: /etc/hostname
       mode: 0644
       contents:
         inline: lmserver
-    - path: /etc/zincati/config.d/51-rollout-wariness.toml
-      contents:
-        inline: |
-          [identity]
-          rollout_wariness = 0.2
     - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
       contents:
         inline: |
           [updates]
@@ -32,16 +35,125 @@ storage:
           start_time = "06:00"
           length_minutes = 60
     - path: /etc/systemd/resolved.conf
+      mode: 0644
       contents:
         inline: |
           [Resolve]
           DNSStubListener=no
     - path: /etc/resolv.conf.manual
+      mode: 0644
       contents:
         inline: |
-          search mdekort.lan
-          nameserver 10.204.0.1
-          nameserver 2a02:a45b:51f6:100::1
+          search mdekort.nl
+          nameserver 10.204.10.1
+    - path: /etc/systemd/journald.conf.d/volatile.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          RuntimeMaxUse=512M
+          RuntimeMaxFileSize=64M
+          RuntimeMaxFiles=8
+    - path: /etc/systemd/swap.conf
+      mode: 0644
+      contents:
+        inline: |
+          swapfc_enabled=1
+          swapfc_size=4G
+          swapfc_path=/var/swap/
+    - path: /etc/smartd.conf
+      mode: 0644
+      contents:
+        inline: |
+          DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+    # Container services
+    - path: /etc/systemd/system/container-portainer.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman container-portainer.service
+          Documentation=man:podman-generate-systemd(1)
+          Wants=network-online.target
+          After=network-online.target
+          RequiresMountsFor=%t/containers
+
+          [Service]
+          Environment=PODMAN_SYSTEMD_UNIT=%n
+          Restart=always
+          StartLimitIntervalSec=0
+          TimeoutStopSec=70
+          ExecStartPre=/bin/rm \
+          	-f %t/%n.ctr-id
+          ExecStart=/usr/bin/podman run \
+          	--cidfile=%t/%n.ctr-id \
+          	--cgroups=no-conmon \
+          	--rm \
+          	--sdnotify=conmon \
+          	--replace \
+          	--pull=newer \
+          	--name=portainer \
+          	-d \
+          	--network=host \
+          	--tmpfs /tmp \
+          	--tmpfs /var/tmp \
+          	-v /srv/primary/docker/portainer:/data:Z \
+          	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+          	--health-cmd="wget --no-verbose --tries=1 --spider https://localhost:9443/ || exit 1" \
+          	--health-interval=30s \
+          	--health-retries=3 \
+          	--label io.containers.autoupdate=registry \
+          	docker.io/portainer/portainer-ee:alpine
+          ExecStop=/usr/bin/podman stop \
+          	--ignore -t 10 \
+          	--cidfile=%t/%n.ctr-id
+          ExecStopPost=/usr/bin/podman rm \
+          	-f \
+          	--ignore -t 10 \
+          	--cidfile=%t/%n.ctr-id
+          Type=notify
+          NotifyAccess=all
+
+          [Install]
+          WantedBy=default.target
+    - path: /etc/systemd/system/podman-auto-update.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman auto-update timer
+
+          [Timer]
+          OnCalendar=daily
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+    # Maintenance services
+    - path: /etc/systemd/system/btrfs-scrub@.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Btrfs scrub on %i
+          
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/btrfs scrub start -B %i
+    - path: /etc/systemd/system/btrfs-scrub@.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Weekly Btrfs scrub on %i
+          
+          [Timer]
+          OnCalendar=weekly
+          Persistent=true
+          
+          [Install]
+          WantedBy=timers.target
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -49,71 +161,31 @@ storage:
       target: /etc/resolv.conf.manual
 systemd:
   units:
-    - name: var-mnt-storage.mount
+    - name: srv-primary.mount
       enabled: true
       contents: |
         [Unit]
-        Description=Mount storage directory
+        Description=Mount primary storage directory
 
         [Mount]
-        What=LABEL=storage
-        Where=/var/mnt/storage
+        What=LABEL=primary
+        Where=/srv/primary
         Type=btrfs
         Options=defaults,nofail,noatime,autodefrag
 
         [Install]
         WantedBy=multi-user.target
-    - name: btrfs-scrub.service
-      enabled: false
-      contents: |
-        [Unit]
-        Description=Scrub a BTRFS filesystem, check volume for errors
-
-        [Service]
-        Nice=19
-        IOSchedulingClass=idle
-        KillSignal=SIGINT
-        ExecStart=/usr/sbin/btrfs scrub start -B /dev/disk/by-label/storage
-    - name: btrfs-scrub.timer
+    - name: container-portainer.service
       enabled: true
-      contents: |
-        [Unit]
-        Description=Trigger BTRFS scrub on storage filesystem
-
-        [Timer]
-        OnCalendar=monthly
-        AccuracySec=1d
-        RandomizedDelaySec=1w
-        Persistent=true
-
-        [Install]
-        WantedBy=timers.target
+    - name: podman-auto-update.timer
+      enabled: true
     - name: docker.service
       enabled: true
-    - name: portainer.service
+    - name: smartd.service
       enabled: true
-      contents: |
-        [Unit]
-        Description=Portainer Service
-        After=docker.service
-        Requires=docker.service
-
-        [Service]
-        Restart=always
-        ExecStartPre=-mkdir -p /var/mnt/storage/docker/portainer
-        ExecStartPre=-/usr/bin/docker rm -f portainer
-        ExecStartPre=-/usr/bin/docker pull portainer/portainer-ce:alpine
-        ExecStartPre=/usr/bin/docker create \
-          --name portainer \
-          --rm \
-          --volume /var/mnt/storage/docker/portainer:/data:rw \
-          --volume /var/run/docker.sock:/var/run/docker.sock:ro \
-          --log-driver syslog \
-          --log-opt 'syslog-address=udp://127.0.0.1:515' \
-          --log-opt 'tag={{.Name}}/{{.FullID}}' \
-          --publish 9443:9443 \
-          portainer/portainer-ee:alpine
-        ExecStart=/usr/bin/docker start -a portainer
-
-        [Install]
-        WantedBy=multi-user.target
+    - name: zincati.service
+      enabled: true
+    - name: btrfs-scrub@srv-primary.timer
+      enabled: true
+    - name: systemd-swap.service
+      enabled: true

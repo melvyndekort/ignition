@@ -52,7 +52,7 @@ storage:
     - path: /etc/resolv.conf.manual
       contents:
         inline: |
-          search mdekort.lan
+          search mdekort.nl
           nameserver 10.204.10.1
     - path: /etc/hosts
       mode: 0644
