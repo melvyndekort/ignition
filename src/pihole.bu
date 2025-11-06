@@ -186,7 +186,7 @@ systemd:
         	--name=pihole \
         	-d \
         	-e TZ=Europe/Amsterdam \
-        	-e VIRTUAL_HOST=pihole-1.mdekort.lan \
+        	-e VIRTUAL_HOST=pihole-1.mdekort.nl \
                 -e DNSMASQ_USER=pihole \
         	-e SKIPGRAVITYONBOOT=1 \
         	--tmpfs /tmp \
