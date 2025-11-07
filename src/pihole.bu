@@ -49,16 +49,40 @@ storage:
         inline: |
           [Resolve]
           DNSStubListener=no
-    - path: /etc/resolv.conf.manual
-      contents:
-        inline: |
-          search mdekort.nl
-          nameserver 10.204.10.1
     - path: /etc/hosts
       mode: 0644
       append:
         - inline: |
             10.204.10.2 lmserver.mdekort.nl
+    - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
+      mode: 0644
+      contents:
+        inline: |
+          [connection]
+          ipv6.ip6-privacy=0
+          ipv6.addr-gen-mode=stable-privacy
+    - path: /etc/NetworkManager/system-connections/Wired connection 1.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=Wired connection 1
+          type=ethernet
+          autoconnect=true
+
+          [ethernet]
+          
+          [ipv4]
+          method=manual
+          address1=10.204.10.3/24
+          gateway=10.204.10.1
+          dns=10.204.10.1;
+          
+          [ipv6]
+          method=auto
+          addr-gen-mode=stable-privacy
+          ip6-privacy=0
+          address1=2a02:a45b:51f6:10::3/64
 
     - path: /var/containers/unbound/unbound.conf
       mode: 0644
@@ -93,9 +117,6 @@ storage:
     - { path: /var/containers/cloudflared, mode: 0755, user: {name: root}, group: {name: root} }
     - { path: /var/containers/beszel_agent, mode: 0755, user: {name: root}, group: {name: root} }
   links:
-    - path: /etc/resolv.conf
-      target: /etc/resolv.conf.manual
-      overwrite: true
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
 systemd:
@@ -110,11 +131,11 @@ systemd:
     - name: ModemManager.service
       enabled: false
       mask: true
-    - name: container-unbound.service
+    - name: unbound.service
       enabled: true
       contents: |
         [Unit]
-        Description=Podman container-unbound.service
+        Description=Podman unbound.service
         Documentation=man:podman-generate-systemd(1)
         Wants=network-online.target
         After=network-online.target
@@ -157,17 +178,17 @@ systemd:
 
         [Install]
         WantedBy=default.target
-    - name: container-pihole.service
+    - name: pihole.service
       enabled: true
       contents: |
         [Unit]
-        Description=Podman container-pihole.service
+        Description=Podman pihole.service
         Documentation=man:podman-generate-systemd(1)
         Wants=network-online.target
         After=network-online.target
         RequiresMountsFor=%t/containers
-        Requires=container-unbound.service
-        After=container-unbound.service
+        Requires=unbound.service
+        After=unbound.service
 
         [Service]
         Environment=PODMAN_SYSTEMD_UNIT=%n
@@ -228,11 +249,11 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    - name: container-cloudflared.service
+    - name: cloudflared.service
       enabled: true
       contents: |
         [Unit]
-        Description=Podman container-cloudflared.service
+        Description=Podman cloudflared.service
         Documentation=man:podman-generate-systemd(1)
         Wants=network-online.target
         After=network-online.target
@@ -260,7 +281,7 @@ systemd:
         	-v /var/containers/cloudflared:/etc/cloudflared:Z \
         	--net=host \
         	--label io.containers.autoupdate=registry \
-        	docker.io/cloudflare/cloudflared:latest tunnel run --token-file /etc/cloudflared/tunnel-token
+        	docker.io/cloudflare/cloudflared:latest tunnel run
         ExecStop=/usr/bin/podman stop \
         	--ignore -t 10 \
         	--cidfile=%t/%n.ctr-id
@@ -273,11 +294,11 @@ systemd:
 
         [Install]
         WantedBy=default.target
-    - name: container-beszel-agent.service
+    - name: beszel-agent.service
       enabled: true
       contents: |
         [Unit]
-        Description=Podman container-beszel-agent.service
+        Description=Podman beszel-agent.service
         Documentation=man:podman-generate-systemd(1)
         Wants=network-online.target
         After=network-online.target
