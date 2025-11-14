@@ -34,12 +34,7 @@ storage:
           days = [ "Sat", "Sun" ]
           start_time = "06:00"
           length_minutes = 60
-    - path: /etc/systemd/resolved.conf
-      mode: 0644
-      contents:
-        inline: |
-          [Resolve]
-          DNSStubListener=no
+
     - path: /etc/systemd/journald.conf.d/volatile.conf
       mode: 0644
       contents:
@@ -182,6 +177,9 @@ storage:
       target: /usr/share/zoneinfo/Europe/Amsterdam
 systemd:
   units:
+    - name: systemd-resolved.service
+      enabled: false
+      mask: true
     - name: srv-primary.mount
       enabled: true
       contents: |
