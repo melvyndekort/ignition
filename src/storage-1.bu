@@ -1,0 +1,196 @@
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: core
+      password_hash: "$6$ap2KrVdWE6eHy/6B$vMtfp2m460/zaxgWtwKir7BssW0huVqxeVmIzs6cfD0B7iZOC7fFLNPIjKl0q1cxY1RUQJDgm5A.KuWGmEC1P0"
+      ssh_authorized_keys:
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4= yubikey-main
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
+storage:
+  directories:
+    - path: /srv
+      mode: 0755
+      overwrite: true
+    - path: /srv/primary
+      mode: 0755
+    - path: /var/swap
+      mode: 0755
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: storage-1
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+          [[updates.periodic.window]]
+          days = [ "Sat", "Sun" ]
+          start_time = "06:00"
+          length_minutes = 60
+    - path: /etc/systemd/journald.conf.d/volatile.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          RuntimeMaxUse=512M
+          RuntimeMaxFileSize=64M
+          RuntimeMaxFiles=8
+    - path: /etc/systemd/swap.conf
+      mode: 0644
+      contents:
+        inline: |
+          swapfc_enabled=1
+          swapfc_size=4G
+          swapfc_path=/var/swap/
+    - path: /etc/smartd.conf
+      mode: 0644
+      contents:
+        inline: |
+          DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+    - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
+      mode: 0644
+      contents:
+        inline: |
+          [connection]
+          ipv6.ip6-privacy=0
+          ipv6.addr-gen-mode=stable-privacy
+    - path: /etc/NetworkManager/system-connections/Wired connection 2.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=Wired connection 2
+          type=ethernet
+          autoconnect=true
+
+          [ethernet]
+          
+          [ipv4]
+          method=manual
+          address1=10.204.10.2/24
+          gateway=10.204.10.1
+          dns=10.204.10.1;
+          
+          [ipv6]
+          method=auto
+          addr-gen-mode=stable-privacy
+          ip6-privacy=0
+          address1=2a02:a45b:51f6:10::2/64
+    - path: /etc/exports
+      mode: 0644
+      contents:
+        inline: |
+          # NFSv4 pseudo-root
+          /var/mnt/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
+          
+          # Write access for compute-1 server
+          /var/mnt/storage/audiobooks 10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/downloads  10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/ebooks     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/movies     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/music      10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/photos     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/software   10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/torrents   10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/tvshows    10.204.10.4(rw,sync,no_subtree_check)
+          
+          # Read-only access for Kodi clients
+          /var/mnt/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+    - path: /etc/systemd/system/btrfs-scrub@.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Btrfs scrub on %i
+          
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/btrfs scrub start -B %i
+    - path: /etc/systemd/system/btrfs-scrub@.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Weekly Btrfs scrub on %i
+          
+          [Timer]
+          OnCalendar=weekly
+          Persistent=true
+          
+          [Install]
+          WantedBy=timers.target
+    - path: /etc/systemd/system/podman-auto-update.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman auto-update timer
+
+          [Timer]
+          OnCalendar=daily
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+  links:
+    - path: /etc/localtime
+      target: /usr/share/zoneinfo/Europe/Amsterdam
+systemd:
+  units:
+    - name: rpm-ostree-install-nfs-utils.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer nfs-utils with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nfs-utils
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: systemd-resolved.service
+      enabled: false
+      mask: true
+    - name: srv-primary.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount primary storage directory
+
+        [Mount]
+        What=LABEL=primary
+        Where=/srv/primary
+        Type=btrfs
+        Options=defaults,nofail,noatime,autodefrag
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: smartd.service
+      enabled: true
+    - name: zincati.service
+      enabled: true
+    - name: nfs-server.service
+      enabled: true
+    - name: btrfs-scrub@srv-primary.timer
+      enabled: true
+    - name: podman-auto-update.timer
+      enabled: true
+    - name: systemd-swap.service
+      enabled: true

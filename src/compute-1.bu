@@ -1,0 +1,190 @@
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: core
+      password_hash: "$6$ap2KrVdWE6eHy/6B$vMtfp2m460/zaxgWtwKir7BssW0huVqxeVmIzs6cfD0B7iZOC7fFLNPIjKl0q1cxY1RUQJDgm5A.KuWGmEC1P0"
+      ssh_authorized_keys:
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4= yubikey-main
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
+storage:
+  directories:
+    - path: /var/mnt/storage
+      mode: 0755
+    - path: /var/swap
+      mode: 0755
+    - path: /srv/primary/docker/portainer
+      mode: 0755
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: compute-1
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+          [[updates.periodic.window]]
+          days = [ "Sat", "Sun" ]
+          start_time = "06:00"
+          length_minutes = 60
+    - path: /etc/systemd/journald.conf.d/volatile.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          RuntimeMaxUse=512M
+          RuntimeMaxFileSize=64M
+          RuntimeMaxFiles=8
+    - path: /etc/systemd/swap.conf
+      mode: 0644
+      contents:
+        inline: |
+          swapfc_enabled=1
+          swapfc_size=4G
+          swapfc_path=/var/swap/
+    - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
+      mode: 0644
+      contents:
+        inline: |
+          [connection]
+          ipv6.ip6-privacy=0
+          ipv6.addr-gen-mode=stable-privacy
+    - path: /etc/NetworkManager/system-connections/Wired connection 1.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=Wired connection 1
+          type=ethernet
+          autoconnect=true
+
+          [ethernet]
+          
+          [ipv4]
+          method=manual
+          address1=10.204.10.4/24
+          gateway=10.204.10.1
+          dns=10.204.10.1;
+          
+          [ipv6]
+          method=auto
+          addr-gen-mode=stable-privacy
+          ip6-privacy=0
+          address1=2a02:a45b:51f6:10::4/64
+    - path: /etc/fstab
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          # NFS mounts from storage-1 (10.204.10.2)
+          10.204.10.2:/var/mnt/storage/audiobooks  /var/mnt/storage/audiobooks  nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/downloads   /var/mnt/storage/downloads   nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/ebooks      /var/mnt/storage/ebooks      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/movies      /var/mnt/storage/movies      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/music       /var/mnt/storage/music       nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/photos      /var/mnt/storage/photos      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/software    /var/mnt/storage/software    nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/torrents    /var/mnt/storage/torrents    nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.2:/var/mnt/storage/tvshows     /var/mnt/storage/tvshows     nfs4  defaults,_netdev,nofail  0 0
+    - path: /etc/systemd/system/container-portainer.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman container-portainer.service
+          Documentation=man:podman-generate-systemd(1)
+          Wants=network-online.target
+          After=network-online.target
+          RequiresMountsFor=%t/containers
+
+          [Service]
+          Environment=PODMAN_SYSTEMD_UNIT=%n
+          Restart=always
+          StartLimitIntervalSec=0
+          TimeoutStopSec=70
+          ExecStartPre=/bin/rm \
+          	-f %t/%n.ctr-id
+          ExecStart=/usr/bin/podman run \
+          	--cidfile=%t/%n.ctr-id \
+          	--cgroups=no-conmon \
+          	--rm \
+          	--sdnotify=conmon \
+          	--replace \
+          	--pull=newer \
+          	--name=portainer \
+          	-d \
+          	--network=host \
+          	--tmpfs /tmp \
+          	--tmpfs /var/tmp \
+          	-v /srv/primary/docker/portainer:/data:Z \
+          	-v /var/run/docker.sock:/var/run/docker.sock:ro \
+          	--health-cmd="wget --no-verbose --tries=1 --spider https://localhost:9443/ || exit 1" \
+          	--health-interval=30s \
+          	--health-retries=3 \
+          	--label io.containers.autoupdate=registry \
+          	docker.io/portainer/portainer-ee:alpine
+          ExecStop=/usr/bin/podman stop \
+          	--ignore -t 10 \
+          	--cidfile=%t/%n.ctr-id
+          ExecStopPost=/usr/bin/podman rm \
+          	-f \
+          	--ignore -t 10 \
+          	--cidfile=%t/%n.ctr-id
+          Type=notify
+          NotifyAccess=all
+
+          [Install]
+          WantedBy=default.target
+    - path: /etc/systemd/system/podman-auto-update.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman auto-update timer
+
+          [Timer]
+          OnCalendar=daily
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+  links:
+    - path: /etc/localtime
+      target: /usr/share/zoneinfo/Europe/Amsterdam
+systemd:
+  units:
+    - name: rpm-ostree-install-nfs-utils.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer nfs-utils with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nfs-utils
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: systemd-resolved.service
+      enabled: false
+      mask: true
+    - name: docker.service
+      enabled: true
+    - name: container-portainer.service
+      enabled: true
+    - name: podman-auto-update.timer
+      enabled: true
+    - name: zincati.service
+      enabled: true
+    - name: systemd-swap.service
+      enabled: true
