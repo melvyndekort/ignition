@@ -85,6 +85,42 @@ storage:
           addr-gen-mode=stable-privacy
           ip6-privacy=0
           address1=2a02:a45b:51f6:10::2/64
+    - path: /etc/exports
+      mode: 0644
+      contents:
+        inline: |
+          # NVSv4 pseudo-root
+          /var/mnt/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
+          
+          # Write access for compute-1 server
+          /var/mnt/storage/audiobooks 10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/downloads  10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/ebooks     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/movies     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/music      10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/photos     10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/software   10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/torrents   10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/tvshows    10.204.10.4(rw,sync,no_subtree_check)
+          # 10.204.10.4 = compute-1 IP
+          # rw = read/write
+          # sync = ensure writes are committed safely
+          # no_subtree_check = improves reliability
+          
+          # Read-only access for Kodi clients
+          /var/mnt/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/mnt/storage/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          # ro = read-only
+          # sync = ensure writes are committed safely
+          # no_subtree_check = improves reliability
+          # all_squash = map all UIDs and GIDs to anonymous user
+          # insecure = allow unprivileged ports, non-root ports
+          # anonuid = specify uid of anonymous user
+          # anongid = specify gid of anonymous user
     # Container services
     - path: /etc/systemd/system/container-portainer.service
       mode: 0644
@@ -177,6 +213,24 @@ storage:
       target: /usr/share/zoneinfo/Europe/Amsterdam
 systemd:
   units:
+    - name: rpm-ostree-install-nfs-utils.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer nfs-utils with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nfs-utils
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
     - name: systemd-resolved.service
       enabled: false
       mask: true
@@ -203,6 +257,8 @@ systemd:
     - name: smartd.service
       enabled: true
     - name: zincati.service
+      enabled: true
+    - name: nfs-server.service
       enabled: true
     - name: btrfs-scrub@srv-primary.timer
       enabled: true
