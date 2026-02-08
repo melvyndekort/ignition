@@ -5,7 +5,55 @@ This repository contains Butane configurations for setting up various servers on
 ## Available Configurations
 
 - **pihole.bu**: Pihole DNS server with Unbound and Cloudflared
-- **lmserver.bu**: Additional server configuration
+- **storage-1.bu**: Storage server with NFS exports and BTRFS
+- **compute-1.bu**: Compute server for Docker containers
+- **lmserver.bu**: Legacy server configuration (deprecated)
+
+## Installing Fedora CoreOS
+
+### Prerequisites
+
+1. Download the Fedora CoreOS ISO:
+```bash
+podman run --pull=always --rm -v .:/data -w /data \
+    quay.io/coreos/coreos-installer:release download -s stable -p metal -f iso
+```
+
+2. Build the ignition files (or let GitHub Actions do it):
+```bash
+make
+```
+
+### Installation Methods
+
+#### Method 1: Interactive Install
+
+1. Create bootable USB with the ISO
+2. Boot target machine from USB
+3. Serve ignition file from your network:
+```bash
+make serve  # Serves on http://localhost:8080
+```
+4. Install from the booted system:
+```bash
+sudo coreos-installer install /dev/nvme0n1 \
+    --ignition-url http://YOUR_IP:8080/compute-1.ign
+```
+5. Reboot
+
+#### Method 2: Automated Install
+
+Create a customized ISO that auto-installs:
+```bash
+coreos-installer iso customize \
+    --dest-device /dev/nvme0n1 \
+    --dest-ignition dist/compute-1.ign \
+    -o compute-1-auto.iso fedora-coreos-*.iso
+```
+
+Boot from this ISO - it will install automatically without interaction.
+
+## Available Configurations
 
 ## Building and Deployment
 
