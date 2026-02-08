@@ -53,7 +53,7 @@ storage:
       mode: 0644
       append:
         - inline: |
-            10.204.10.20 lmserver.mdekort.nl
+            10.204.10.20 storage-1.mdekort.nl
     - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
       mode: 0644
       contents:
@@ -365,7 +365,7 @@ systemd:
                 -e LISTEN=45876 \
                 -e "KEY=CHANGEME" \
                 -e TOKEN=CHANGEME \
-                -e HUB_URL=https://lmserver.mdekort.nl/beszel \
+                -e HUB_URL=https://storage-1.mdekort.nl/beszel \
         	--tmpfs /tmp \
         	--tmpfs /var/tmp \
         	-v /var/containers/beszel_agent:/var/lib/beszel-agent:Z \
