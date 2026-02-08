@@ -9,23 +9,23 @@ passwd:
         - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
 storage:
   directories:
-    - path: /srv/audiobooks
+    - path: /var/srv/audiobooks
       mode: 0755
-    - path: /srv/downloads
+    - path: /var/srv/downloads
       mode: 0755
-    - path: /srv/ebooks
+    - path: /var/srv/ebooks
       mode: 0755
-    - path: /srv/movies
+    - path: /var/srv/movies
       mode: 0755
-    - path: /srv/music
+    - path: /var/srv/music
       mode: 0755
-    - path: /srv/photos
+    - path: /var/srv/photos
       mode: 0755
-    - path: /srv/software
+    - path: /var/srv/software
       mode: 0755
-    - path: /srv/torrents
+    - path: /var/srv/torrents
       mode: 0755
-    - path: /srv/tvshows
+    - path: /var/srv/tvshows
       mode: 0755
     - path: /var/swap
       mode: 0755
@@ -185,8 +185,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/audiobooks
-        Where=/srv/audiobooks
+        What=10.204.10.20:/var/srv/audiobooks
+        Where=/var/srv/audiobooks
         Type=nfs4
         Options=defaults,nofail
 
@@ -201,8 +201,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/downloads
-        Where=/srv/downloads
+        What=10.204.10.20:/var/srv/downloads
+        Where=/var/srv/downloads
         Type=nfs4
         Options=defaults,nofail
 
@@ -217,8 +217,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/ebooks
-        Where=/srv/ebooks
+        What=10.204.10.20:/var/srv/ebooks
+        Where=/var/srv/ebooks
         Type=nfs4
         Options=defaults,nofail
 
@@ -233,8 +233,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/movies
-        Where=/srv/movies
+        What=10.204.10.20:/var/srv/movies
+        Where=/var/srv/movies
         Type=nfs4
         Options=defaults,nofail
 
@@ -249,8 +249,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/music
-        Where=/srv/music
+        What=10.204.10.20:/var/srv/music
+        Where=/var/srv/music
         Type=nfs4
         Options=defaults,nofail
 
@@ -265,8 +265,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/photos
-        Where=/srv/photos
+        What=10.204.10.20:/var/srv/photos
+        Where=/var/srv/photos
         Type=nfs4
         Options=defaults,nofail
 
@@ -281,8 +281,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/software
-        Where=/srv/software
+        What=10.204.10.20:/var/srv/software
+        Where=/var/srv/software
         Type=nfs4
         Options=defaults,nofail
 
@@ -297,8 +297,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/torrents
-        Where=/srv/torrents
+        What=10.204.10.20:/var/srv/torrents
+        Where=/var/srv/torrents
         Type=nfs4
         Options=defaults,nofail
 
@@ -313,8 +313,8 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/srv/tvshows
-        Where=/srv/tvshows
+        What=10.204.10.20:/var/srv/tvshows
+        Where=/var/srv/tvshows
         Type=nfs4
         Options=defaults,nofail
 
