@@ -80,16 +80,16 @@ storage:
       overwrite: true
       contents:
         inline: |
-          # NFS mounts from storage-1 (10.204.10.2)
-          10.204.10.2:/var/mnt/storage/audiobooks  /var/mnt/storage/audiobooks  nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/downloads   /var/mnt/storage/downloads   nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/ebooks      /var/mnt/storage/ebooks      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/movies      /var/mnt/storage/movies      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/music       /var/mnt/storage/music       nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/photos      /var/mnt/storage/photos      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/software    /var/mnt/storage/software    nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/torrents    /var/mnt/storage/torrents    nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.2:/var/mnt/storage/tvshows     /var/mnt/storage/tvshows     nfs4  defaults,_netdev,nofail  0 0
+          # NFS mounts from storage-1 (10.204.10.20)
+          10.204.10.20:/var/mnt/storage/audiobooks  /var/mnt/storage/audiobooks  nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/downloads   /var/mnt/storage/downloads   nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/ebooks      /var/mnt/storage/ebooks      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/movies      /var/mnt/storage/movies      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/music       /var/mnt/storage/music       nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/photos      /var/mnt/storage/photos      nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/software    /var/mnt/storage/software    nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/torrents    /var/mnt/storage/torrents    nfs4  defaults,_netdev,nofail  0 0
+          10.204.10.20:/var/mnt/storage/tvshows     /var/mnt/storage/tvshows     nfs4  defaults,_netdev,nofail  0 0
     - path: /etc/systemd/system/container-portainer.service
       mode: 0644
       contents:

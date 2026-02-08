@@ -53,7 +53,7 @@ storage:
       mode: 0644
       append:
         - inline: |
-            10.204.10.2 lmserver.mdekort.nl
+            10.204.10.20 lmserver.mdekort.nl
     - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
       mode: 0644
       contents:
@@ -74,7 +74,7 @@ storage:
           
           [ipv4]
           method=manual
-          address1=10.204.10.3/24
+          address1=10.204.10.10/24
           gateway=10.204.10.1
           dns=10.204.10.1;
           
@@ -110,9 +110,9 @@ storage:
                   auth_type PASS
                   auth_pass AI9baG
               }
-              unicast_src_ip 10.204.10.3
+              unicast_src_ip 10.204.10.10
               unicast_peer {
-                  10.204.10.2
+                  10.204.10.20
               }
               virtual_ipaddress {
                   10.204.10.10/24

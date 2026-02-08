@@ -76,7 +76,7 @@ storage:
           
           [ipv4]
           method=manual
-          address1=10.204.10.2/24
+          address1=10.204.10.20/24
           gateway=10.204.10.1
           dns=10.204.10.1;
           
