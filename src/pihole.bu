@@ -150,6 +150,24 @@ storage:
           [zram0]
           zram-size = ram / 2
           compression-algorithm = lz4
+    - path: /var/containers/caddy/Caddyfile
+      mode: 0644
+      user:
+        name: root
+      group:
+        name: root
+      contents:
+        inline: |
+          {
+          	auto_https disable_redirects
+          }
+
+          pihole-1.mdekort.nl {
+          	tls {
+          		dns cloudflare {$CLOUDFLARE_API_TOKEN}
+          	}
+          	reverse_proxy localhost:80
+          }
   directories:
     - { path: /var/containers/unbound, mode: 0755, user: {name: core}, group: {name: core} }
     - { path: /var/containers/pihole, mode: 0755, user: {name: core}, group: {name: core} }
@@ -157,6 +175,7 @@ storage:
     - { path: /var/containers/cloudflared, mode: 0755, user: {name: root}, group: {name: root} }
     - { path: /var/containers/beszel_agent, mode: 0755, user: {name: root}, group: {name: root} }
     - { path: /var/containers/keepalived, mode: 0755, user: {name: root}, group: {name: root} }
+    - { path: /var/containers/caddy/data, mode: 0755, user: {name: root}, group: {name: root} }
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -285,7 +304,7 @@ systemd:
         [Service]
         Type=oneshot
         RemainAfterExit=yes
-        ExecStart=/usr/bin/firewall-cmd --permanent --add-port=53/tcp --add-port=53/udp --add-port=80/tcp --add-port=443/tcp
+        ExecStart=/usr/bin/firewall-cmd --permanent --add-port=53/tcp --add-port=53/udp --add-port=80/tcp --add-port=443/tcp --add-port=443/tcp
         ExecStart=/usr/bin/firewall-cmd --reload
 
         [Install]
@@ -428,6 +447,54 @@ systemd:
         	-f \
         	--ignore -t 10 \
         	--cidfile=%t/%n.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+    - name: caddy.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Podman container-caddy.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        LoadCredential=cloudflare-api-token:/etc/cloudflare-api-token
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/bin/bash -c 'exec /usr/bin/podman run \
+        	--cidfile=/run/%N.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=caddy \
+        	-d \
+        	-e TZ=Europe/Amsterdam \
+        	-e CLOUDFLARE_API_TOKEN="$(cat ${CREDENTIALS_DIRECTORY}/cloudflare-api-token)" \
+        	--tmpfs /tmp \
+        	--tmpfs /var/tmp \
+        	-v /var/containers/caddy/Caddyfile:/etc/caddy/Caddyfile:ro,Z \
+        	-v /var/containers/caddy/data:/data:Z \
+        	--net=host \
+        	--label io.containers.autoupdate=registry \
+        	ghcr.io/caddybuilds/caddy-cloudflare:latest'
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=/run/%N.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=/run/%N.ctr-id
         Type=notify
         NotifyAccess=all
 

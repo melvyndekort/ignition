@@ -53,12 +53,15 @@ Deploy to your Fedora IoT system using the generated ignition file during instal
 - **Unbound**: DNS resolver on port 5335
 - **Pihole**: DNS filter on port 53
 - **Cloudflared**: Cloudflare tunnel
+- **Caddy**: HTTPS reverse proxy for Pihole web interface
+- **Keepalived**: VRRP for high availability
+- **Beszel Agent**: Monitoring agent
 
 ### Prerequisites
 
-Before deploying, you need to create the Cloudflared tunnel token file manually:
+Before deploying, you need to create the following files manually:
 
-#### Required File
+#### Cloudflare Tunnel Token
 
 Create the following file on the target system:
 
@@ -73,36 +76,59 @@ Create the following file on the target system:
 **Content:**
 The file should contain your Cloudflare tunnel token (base64-encoded JSON).
 
-#### Creating the file
+#### Cloudflare API Token for Caddy
 
-1. Ensure the directory exists:
+Create the following file on the target system:
+
+```
+/etc/cloudflare-api-token
+```
+
+**File permissions:**
+- Owner: root:root
+- Mode: 0600 (read/write for owner only)
+
+**Content:**
+The file should contain your Cloudflare API token with Zone Read and DNS Write permissions for mdekort.nl.
+
+#### Creating the files
+
+1. Ensure the directories exist:
    ```bash
    sudo mkdir -p /var/containers/cloudflared
    ```
 
-2. Create the token file:
+2. Create the tunnel token file:
    ```bash
    sudo tee /var/containers/cloudflared/tunnel-token << 'EOF'
    YOUR_TUNNEL_TOKEN_HERE
    EOF
-   ```
-
-3. Set correct ownership and permissions:
-   ```bash
    sudo chown 65532:65532 /var/containers/cloudflared/tunnel-token
    sudo chmod 0600 /var/containers/cloudflared/tunnel-token
+   ```
+
+3. Create the Cloudflare API token file:
+   ```bash
+   sudo tee /etc/cloudflare-api-token << 'EOF'
+   YOUR_CLOUDFLARE_API_TOKEN_HERE
+   EOF
+   sudo chmod 0600 /etc/cloudflare-api-token
    ```
 
 ### Configuration Details
 
 #### Pihole Web Interface
+- HTTP: http://pihole-1.mdekort.nl (port 80)
+- HTTPS: https://pihole-1.mdekort.nl (port 443, via Caddy reverse proxy)
 - Default password: `changeme`
 - Change this password after first login or restore from backup
 
 #### Security Notes
 - The Cloudflare tunnel token is not included in this repository for security reasons
-- Keep your tunnel token secure and rotate it regularly
+- The Cloudflare API token for Caddy is not included in this repository for security reasons
+- Keep your tokens secure and rotate them regularly
 - The pihole web password is set to "changeme" and should be changed for production use
+- Caddy automatically obtains and renews Let's Encrypt certificates via Cloudflare DNS challenge
 
 ---
 
