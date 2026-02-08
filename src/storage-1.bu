@@ -80,7 +80,7 @@ storage:
           method=auto
           addr-gen-mode=stable-privacy
           ip6-privacy=0
-          address1=2a02:a45b:51f6:10::2/64
+          address1=2a02:a45b:51f6:10::20/64
     - path: /etc/exports
       mode: 0644
       contents:
@@ -89,15 +89,15 @@ storage:
           /var/mnt/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
           
           # Write access for compute-1 server
-          /var/mnt/storage/audiobooks 10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/downloads  10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/ebooks     10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/movies     10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/music      10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/photos     10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/software   10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/torrents   10.204.10.4(rw,sync,no_subtree_check)
-          /var/mnt/storage/tvshows    10.204.10.4(rw,sync,no_subtree_check)
+          /var/mnt/storage/audiobooks 10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/downloads  10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/ebooks     10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/movies     10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/music      10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/photos     10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/software   10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/torrents   10.204.10.21(rw,sync,no_subtree_check)
+          /var/mnt/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check)
           
           # Read-only access for Kodi clients
           /var/mnt/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
