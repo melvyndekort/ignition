@@ -12,8 +12,6 @@ storage:
     - path: /srv
       mode: 0755
       overwrite: true
-    - path: /srv/primary
-      mode: 0755
     - path: /var/swap
       mode: 0755
   files:
@@ -86,26 +84,26 @@ storage:
       contents:
         inline: |
           # NFSv4 pseudo-root
-          /var/mnt/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
+          /srv 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
           
           # Write access for compute-1 server
-          /var/mnt/storage/audiobooks 10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/downloads  10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/ebooks     10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/movies     10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/music      10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/photos     10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/software   10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/torrents   10.204.10.21(rw,sync,no_subtree_check)
-          /var/mnt/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check)
+          /srv/audiobooks 10.204.10.21(rw,sync,no_subtree_check)
+          /srv/downloads  10.204.10.21(rw,sync,no_subtree_check)
+          /srv/ebooks     10.204.10.21(rw,sync,no_subtree_check)
+          /srv/movies     10.204.10.21(rw,sync,no_subtree_check)
+          /srv/music      10.204.10.21(rw,sync,no_subtree_check)
+          /srv/photos     10.204.10.21(rw,sync,no_subtree_check)
+          /srv/software   10.204.10.21(rw,sync,no_subtree_check)
+          /srv/torrents   10.204.10.21(rw,sync,no_subtree_check)
+          /srv/tvshows    10.204.10.21(rw,sync,no_subtree_check)
           
           # Read-only access for Kodi clients
-          /var/mnt/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/mnt/storage/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/mnt/storage/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/mnt/storage/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/mnt/storage/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/mnt/storage/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /srv/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
     - path: /etc/systemd/system/btrfs-scrub@.service
       mode: 0644
       contents:
@@ -168,7 +166,7 @@ systemd:
     - name: systemd-resolved.service
       enabled: false
       mask: true
-    - name: srv-primary.mount
+    - name: srv.mount
       enabled: true
       contents: |
         [Unit]
@@ -176,7 +174,7 @@ systemd:
 
         [Mount]
         What=LABEL=primary
-        Where=/srv/primary
+        Where=/srv
         Type=btrfs
         Options=defaults,nofail,noatime,autodefrag
 
@@ -188,7 +186,7 @@ systemd:
       enabled: true
     - name: nfs-server.service
       enabled: true
-    - name: btrfs-scrub@srv-primary.timer
+    - name: btrfs-scrub@srv.timer
       enabled: true
     - name: podman-auto-update.timer
       enabled: true

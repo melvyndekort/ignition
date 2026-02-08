@@ -185,7 +185,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/audiobooks
+        What=10.204.10.20:/srv/audiobooks
         Where=/srv/audiobooks
         Type=nfs4
         Options=defaults,nofail
@@ -201,7 +201,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/downloads
+        What=10.204.10.20:/srv/downloads
         Where=/srv/downloads
         Type=nfs4
         Options=defaults,nofail
@@ -217,7 +217,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/ebooks
+        What=10.204.10.20:/srv/ebooks
         Where=/srv/ebooks
         Type=nfs4
         Options=defaults,nofail
@@ -233,7 +233,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/movies
+        What=10.204.10.20:/srv/movies
         Where=/srv/movies
         Type=nfs4
         Options=defaults,nofail
@@ -249,7 +249,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/music
+        What=10.204.10.20:/srv/music
         Where=/srv/music
         Type=nfs4
         Options=defaults,nofail
@@ -265,7 +265,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/photos
+        What=10.204.10.20:/srv/photos
         Where=/srv/photos
         Type=nfs4
         Options=defaults,nofail
@@ -281,7 +281,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/software
+        What=10.204.10.20:/srv/software
         Where=/srv/software
         Type=nfs4
         Options=defaults,nofail
@@ -297,7 +297,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/torrents
+        What=10.204.10.20:/srv/torrents
         Where=/srv/torrents
         Type=nfs4
         Options=defaults,nofail
@@ -313,7 +313,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/mnt/storage/tvshows
+        What=10.204.10.20:/srv/tvshows
         Where=/srv/tvshows
         Type=nfs4
         Options=defaults,nofail
