@@ -11,6 +11,24 @@ storage:
   directories:
     - path: /var/mnt/storage
       mode: 0755
+    - path: /var/mnt/storage/audiobooks
+      mode: 0755
+    - path: /var/mnt/storage/downloads
+      mode: 0755
+    - path: /var/mnt/storage/ebooks
+      mode: 0755
+    - path: /var/mnt/storage/movies
+      mode: 0755
+    - path: /var/mnt/storage/music
+      mode: 0755
+    - path: /var/mnt/storage/photos
+      mode: 0755
+    - path: /var/mnt/storage/software
+      mode: 0755
+    - path: /var/mnt/storage/torrents
+      mode: 0755
+    - path: /var/mnt/storage/tvshows
+      mode: 0755
     - path: /var/swap
       mode: 0755
     - path: /srv/primary/docker/portainer
@@ -75,21 +93,6 @@ storage:
           addr-gen-mode=stable-privacy
           ip6-privacy=0
           address1=2a02:a45b:51f6:10::21/64
-    - path: /etc/fstab
-      mode: 0644
-      overwrite: true
-      contents:
-        inline: |
-          # NFS mounts from storage-1 (10.204.10.20)
-          10.204.10.20:/var/mnt/storage/audiobooks  /var/mnt/storage/audiobooks  nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/downloads   /var/mnt/storage/downloads   nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/ebooks      /var/mnt/storage/ebooks      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/movies      /var/mnt/storage/movies      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/music       /var/mnt/storage/music       nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/photos      /var/mnt/storage/photos      nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/software    /var/mnt/storage/software    nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/torrents    /var/mnt/storage/torrents    nfs4  defaults,_netdev,nofail  0 0
-          10.204.10.20:/var/mnt/storage/tvshows     /var/mnt/storage/tvshows     nfs4  defaults,_netdev,nofail  0 0
     - path: /etc/systemd/system/container-portainer.service
       mode: 0644
       contents:
@@ -175,6 +178,150 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+    - name: var-mnt-storage-audiobooks.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for audiobooks
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/audiobooks
+        Where=/var/mnt/storage/audiobooks
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-downloads.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for downloads
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/downloads
+        Where=/var/mnt/storage/downloads
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-ebooks.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for ebooks
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/ebooks
+        Where=/var/mnt/storage/ebooks
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-movies.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for movies
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/movies
+        Where=/var/mnt/storage/movies
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-music.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for music
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/music
+        Where=/var/mnt/storage/music
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-photos.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for photos
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/photos
+        Where=/var/mnt/storage/photos
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-software.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for software
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/software
+        Where=/var/mnt/storage/software
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-torrents.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for torrents
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/torrents
+        Where=/var/mnt/storage/torrents
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
+    - name: var-mnt-storage-tvshows.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for tvshows
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/var/mnt/storage/tvshows
+        Where=/var/mnt/storage/tvshows
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
     - name: systemd-resolved.service
       enabled: false
       mask: true
