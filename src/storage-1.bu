@@ -140,6 +140,101 @@ storage:
 
           [Install]
           WantedBy=timers.target
+    - path: /etc/systemd/system/container-beszel-agent.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Beszel Agent Container
+          After=network-online.target var-srv.mount
+          Wants=network-online.target
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f beszel-agent
+          ExecStart=/usr/bin/podman run \
+            --name beszel-agent \
+            --network host \
+            -v /var/lib/containers/beszel-agent:/var/lib/beszel-agent:Z \
+            -v /var/lib/containers/beszel-socket:/beszel_socket:Z \
+            -e LISTEN=45876 \
+            -e KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK \
+            -e HUB_URL=http://localhost:8090 \
+            -e EXTRA_FILESYSTEMS=primary \
+            --label io.containers.autoupdate=registry \
+            henrygd/beszel-agent:latest
+          ExecStop=/usr/bin/podman stop -t 10 beszel-agent
+          
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/container-samba.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Samba Container
+          After=network-online.target var-srv.mount
+          Wants=network-online.target
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f samba
+          ExecStart=/usr/bin/podman run \
+            --name samba \
+            --hostname storage-1 \
+            -v /var/srv:/host/storage:Z \
+            -v /mnt:/host/mnt:Z \
+            --tmpfs /run/samba \
+            --tmpfs /var/cache/samba \
+            --tmpfs /var/log/samba \
+            -p 137:137/udp \
+            -p 138:138/udp \
+            -p 139:139 \
+            -p 445:445 \
+            -e TZ=Europe/Amsterdam \
+            -e USERID=0 \
+            -e GROUPID=0 \
+            -e NMBD=true \
+            -e RECYCLE=true \
+            -e "SHARE01=audiobooks;/host/storage/audiobooks;yes;no;no" \
+            -e "SHARE02=ebooks;/host/storage/ebooks;yes;no;no" \
+            -e "SHARE03=mnt;/host/mnt;yes;no;no" \
+            -e "SHARE04=movies;/host/storage/movies;yes;no;no" \
+            -e "SHARE05=music;/host/storage/music;yes;no;no" \
+            -e "SHARE06=photos;/host/storage/photos;yes;no;no" \
+            -e "SHARE07=software;/host/storage/software;yes;no;no" \
+            -e "SHARE08=tvshows;/host/storage/tvshows;yes;no;no" \
+            -e "SHARE09=torrents;/host/storage/torrents;yes;no;no" \
+            -e "SHARE10=downloads;/host/storage/downloads;yes;no;no" \
+            --label io.containers.autoupdate=registry \
+            dperson/samba:latest
+          ExecStop=/usr/bin/podman stop -t 10 samba
+          
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/container-scheduler.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Scheduler Container
+          After=network-online.target var-srv.mount
+          Wants=network-online.target
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f scheduler
+          ExecStart=/usr/bin/podman run \
+            --name scheduler \
+            -v /var/lib/containers/scheduler:/config:Z \
+            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
+            -e TZ=Europe/Amsterdam \
+            --label io.containers.autoupdate=registry \
+            ghcr.io/melvyndekort/scheduler:latest
+          ExecStop=/usr/bin/podman stop -t 10 scheduler
+          
+          [Install]
+          WantedBy=multi-user.target
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -191,4 +286,12 @@ systemd:
     - name: podman-auto-update.timer
       enabled: true
     - name: systemd-swap.service
+      enabled: true
+    - name: container-beszel-agent.service
+      enabled: true
+    - name: container-samba.service
+      enabled: true
+    - name: container-scheduler.service
+      enabled: true
+    - name: podman.socket
       enabled: true
