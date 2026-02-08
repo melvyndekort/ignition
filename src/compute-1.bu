@@ -29,7 +29,7 @@ storage:
       mode: 0755
     - path: /var/swap
       mode: 0755
-    - path: /srv/primary/docker/portainer
+    - path: /var/lib/portainer
       mode: 0755
   files:
     - path: /etc/hostname
@@ -121,7 +121,7 @@ storage:
           	--network=host \
           	--tmpfs /tmp \
           	--tmpfs /var/tmp \
-          	-v /srv/primary/docker/portainer:/data:Z \
+          	-v /var/lib/portainer:/data:Z \
           	-v /var/run/docker.sock:/var/run/docker.sock:ro \
           	--health-cmd="wget --no-verbose --tries=1 --spider https://localhost:9443/ || exit 1" \
           	--health-interval=30s \
