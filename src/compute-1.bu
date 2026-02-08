@@ -9,25 +9,23 @@ passwd:
         - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
 storage:
   directories:
-    - path: /var/mnt/storage
+    - path: /srv/audiobooks
       mode: 0755
-    - path: /var/mnt/storage/audiobooks
+    - path: /srv/downloads
       mode: 0755
-    - path: /var/mnt/storage/downloads
+    - path: /srv/ebooks
       mode: 0755
-    - path: /var/mnt/storage/ebooks
+    - path: /srv/movies
       mode: 0755
-    - path: /var/mnt/storage/movies
+    - path: /srv/music
       mode: 0755
-    - path: /var/mnt/storage/music
+    - path: /srv/photos
       mode: 0755
-    - path: /var/mnt/storage/photos
+    - path: /srv/software
       mode: 0755
-    - path: /var/mnt/storage/software
+    - path: /srv/torrents
       mode: 0755
-    - path: /var/mnt/storage/torrents
-      mode: 0755
-    - path: /var/mnt/storage/tvshows
+    - path: /srv/tvshows
       mode: 0755
     - path: /var/swap
       mode: 0755
@@ -178,7 +176,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    - name: var-mnt-storage-audiobooks.mount
+    - name: srv-audiobooks.mount
       enabled: true
       contents: |
         [Unit]
@@ -188,13 +186,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/audiobooks
-        Where=/var/mnt/storage/audiobooks
+        Where=/srv/audiobooks
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-downloads.mount
+    - name: srv-downloads.mount
       enabled: true
       contents: |
         [Unit]
@@ -204,13 +202,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/downloads
-        Where=/var/mnt/storage/downloads
+        Where=/srv/downloads
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-ebooks.mount
+    - name: srv-ebooks.mount
       enabled: true
       contents: |
         [Unit]
@@ -220,13 +218,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/ebooks
-        Where=/var/mnt/storage/ebooks
+        Where=/srv/ebooks
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-movies.mount
+    - name: srv-movies.mount
       enabled: true
       contents: |
         [Unit]
@@ -236,13 +234,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/movies
-        Where=/var/mnt/storage/movies
+        Where=/srv/movies
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-music.mount
+    - name: srv-music.mount
       enabled: true
       contents: |
         [Unit]
@@ -252,13 +250,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/music
-        Where=/var/mnt/storage/music
+        Where=/srv/music
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-photos.mount
+    - name: srv-photos.mount
       enabled: true
       contents: |
         [Unit]
@@ -268,13 +266,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/photos
-        Where=/var/mnt/storage/photos
+        Where=/srv/photos
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-software.mount
+    - name: srv-software.mount
       enabled: true
       contents: |
         [Unit]
@@ -284,13 +282,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/software
-        Where=/var/mnt/storage/software
+        Where=/srv/software
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-torrents.mount
+    - name: srv-torrents.mount
       enabled: true
       contents: |
         [Unit]
@@ -300,13 +298,13 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/torrents
-        Where=/var/mnt/storage/torrents
+        Where=/srv/torrents
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-mnt-storage-tvshows.mount
+    - name: srv-tvshows.mount
       enabled: true
       contents: |
         [Unit]
@@ -316,7 +314,7 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/var/mnt/storage/tvshows
-        Where=/var/mnt/storage/tvshows
+        Where=/srv/tvshows
         Type=nfs4
         Options=defaults,nofail
 
