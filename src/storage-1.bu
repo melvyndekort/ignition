@@ -235,6 +235,36 @@ storage:
           
           [Install]
           WantedBy=multi-user.target
+    - path: /etc/systemd/system/container-image-refresher.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Image Refresher Container
+          After=network-online.target podman.socket
+          Wants=network-online.target
+          Requires=podman.socket
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f image-refresher
+          ExecStart=/usr/bin/podman run \
+            --name image-refresher \
+            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
+            -e TZ=Europe/Amsterdam \
+            -e REFRESHER_INTERVAL=7200 \
+            -e REFRESHER_IMAGE1=alpine:latest \
+            -e REFRESHER_IMAGE2=restic/restic:latest \
+            -e REFRESHER_IMAGE3=amazon/aws-cli:latest \
+            -e REFRESHER_IMAGE4=rclone/rclone:latest \
+            -e REFRESHER_IMAGE5=ghcr.io/melvyndekort/internal-dns-sync:latest \
+            -e NTFY_URL=http://ntfy/lmserver \
+            --label io.containers.autoupdate=registry \
+            ghcr.io/melvyndekort/image-refresher:latest
+          ExecStop=/usr/bin/podman stop -t 10 image-refresher
+          
+          [Install]
+          WantedBy=multi-user.target
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -292,6 +322,8 @@ systemd:
     - name: container-samba.service
       enabled: true
     - name: container-scheduler.service
+      enabled: true
+    - name: container-image-refresher.service
       enabled: true
     - name: podman.socket
       enabled: true
