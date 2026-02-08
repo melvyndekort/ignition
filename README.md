@@ -93,6 +93,20 @@ Deploy to your Fedora IoT system using the generated ignition file during instal
 - SSH keys and password hash in the butane files should be updated for your environment
 - Consider using a private repository if you customize the butane files with your credentials
 
+### Hardcoded Credentials to Update
+
+The following credentials are hardcoded in the Butane files and should be updated for production use:
+
+#### pihole.bu
+- **Line 90**: VRRP authentication password: `auth_pass AI9baG`
+- **Line 363-364**: Beszel agent credentials: `KEY=CHANGEME` and `TOKEN=CHANGEME`
+- **Pihole web password**: Set to "changeme" - change after first login
+
+#### storage-1.bu
+- **Line 186**: Beszel agent SSH key (public key, safe to keep)
+
+**Recommendation**: Update these values before deployment or immediately after first boot.
+
 ---
 
 ## Pihole Configuration (pihole.bu)
