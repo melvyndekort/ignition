@@ -140,33 +140,6 @@ storage:
 
           [Install]
           WantedBy=timers.target
-    - path: /etc/systemd/system/container-beszel-agent.service
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=Beszel Agent Container
-          After=network-online.target var-srv.mount
-          Wants=network-online.target
-          
-          [Service]
-          Restart=always
-          ExecStartPre=/usr/bin/podman rm -f beszel-agent
-          ExecStart=/usr/bin/podman run \
-            --name beszel-agent \
-            --network host \
-            -v /var/lib/containers/beszel-agent:/var/lib/beszel-agent:Z \
-            -v /var/lib/containers/beszel-socket:/beszel_socket:Z \
-            -e LISTEN=45876 \
-            -e KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK \
-            -e HUB_URL=http://localhost:8090 \
-            -e EXTRA_FILESYSTEMS=primary \
-            --label io.containers.autoupdate=registry \
-            henrygd/beszel-agent:latest
-          ExecStop=/usr/bin/podman stop -t 10 beszel-agent
-          
-          [Install]
-          WantedBy=multi-user.target
     - path: /etc/systemd/system/container-samba.service
       mode: 0644
       contents:
@@ -265,6 +238,46 @@ storage:
           
           [Install]
           WantedBy=multi-user.target
+    - path: /etc/systemd/system/beszel-agent.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Beszel Agent
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Environment=PODMAN_SYSTEMD_UNIT=%n
+          Environment="KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK"
+          Restart=always
+          TimeoutStopSec=70
+          ExecStartPre=/bin/rm -f %t/%n.ctr-id
+          ExecStart=/usr/bin/podman run \
+            --cidfile=%t/%n.ctr-id \
+            --cgroups=no-conmon \
+            --rm \
+            --sdnotify=conmon \
+            --replace \
+            --name beszel-agent \
+            --network host \
+            --security-opt label=disable \
+            -v /var/lib/containers/beszel-agent:/var/lib/beszel-agent \
+            -v /var/lib/containers/beszel-socket:/beszel_socket \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -e LISTEN=45876 \
+            -e KEY="${KEY}" \
+            -e HUB_URL=http://10.204.10.21:8090 \
+            -e TOKEN=114ec-12f275fe9-17a9d-5934fc7ef \
+            -e EXTRA_FILESYSTEMS=primary \
+            docker.io/henrygd/beszel-agent:latest
+          ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+          ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+          Type=notify
+          NotifyAccess=all
+
+          [Install]
+          WantedBy=multi-user.target
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -324,6 +337,8 @@ systemd:
     - name: container-scheduler.service
       enabled: true
     - name: container-image-refresher.service
+      enabled: true
+    - name: beszel-agent.service
       enabled: true
     - name: podman.socket
       enabled: true

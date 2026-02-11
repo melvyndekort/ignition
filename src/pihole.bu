@@ -380,7 +380,7 @@ systemd:
                 -e LISTEN=45876 \
                 -e "KEY=CHANGEME" \
                 -e TOKEN=CHANGEME \
-                -e HUB_URL=https://storage-1.mdekort.nl/beszel \
+                -e HUB_URL=http://10.204.10.21:8090 \
         	--tmpfs /tmp \
         	--tmpfs /var/tmp \
         	-v /var/containers/beszel_agent:/var/lib/beszel-agent:Z \
