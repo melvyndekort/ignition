@@ -104,6 +104,12 @@ storage:
           /var/srv/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
           /var/srv/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
           /var/srv/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+    - path: /etc/systemd/system/docker.socket.d/tcp.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Socket]
+          ListenStream=2375
     - path: /etc/systemd/system/btrfs-scrub@.service
       mode: 0644
       contents:
