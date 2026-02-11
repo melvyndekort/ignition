@@ -146,6 +146,12 @@ storage:
           [zram0]
           zram-size = ram / 2
           compression-algorithm = lz4
+    - path: /etc/systemd/system/podman.socket.d/tcp.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Socket]
+          ListenStream=2375
     - path: /var/containers/caddy/Caddyfile
       mode: 0644
       user:
