@@ -84,13 +84,21 @@ storage:
           method=manual
           address1=10.204.10.21/24
           gateway=10.204.10.1
-          dns=10.204.10.1;
+          dns=10.204.10.2;10.204.10.1;
           
           [ipv6]
           method=auto
           addr-gen-mode=stable-privacy
           ip6-privacy=0
           address1=2a02:a45b:51f6:10::21/64
+    - path: /etc/resolv.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          search mdekort.nl
+          nameserver 10.204.10.2
+          nameserver 10.204.10.1
     - path: /etc/systemd/system/container-portainer.service
       mode: 0644
       contents:
@@ -176,7 +184,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-    - name: srv-audiobooks.mount
+    - name: var-srv-audiobooks.mount
       enabled: true
       contents: |
         [Unit]
@@ -185,14 +193,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/audiobooks
+        What=10.204.10.20:/audiobooks
         Where=/var/srv/audiobooks
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-downloads.mount
+    - name: var-srv-downloads.mount
       enabled: true
       contents: |
         [Unit]
@@ -201,14 +209,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/downloads
+        What=10.204.10.20:/downloads
         Where=/var/srv/downloads
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-ebooks.mount
+    - name: var-srv-ebooks.mount
       enabled: true
       contents: |
         [Unit]
@@ -217,14 +225,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/ebooks
+        What=10.204.10.20:/ebooks
         Where=/var/srv/ebooks
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-movies.mount
+    - name: var-srv-movies.mount
       enabled: true
       contents: |
         [Unit]
@@ -233,14 +241,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/movies
+        What=10.204.10.20:/movies
         Where=/var/srv/movies
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-music.mount
+    - name: var-srv-music.mount
       enabled: true
       contents: |
         [Unit]
@@ -249,14 +257,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/music
+        What=10.204.10.20:/music
         Where=/var/srv/music
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-photos.mount
+    - name: var-srv-photos.mount
       enabled: true
       contents: |
         [Unit]
@@ -265,14 +273,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/photos
+        What=10.204.10.20:/photos
         Where=/var/srv/photos
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-software.mount
+    - name: var-srv-software.mount
       enabled: true
       contents: |
         [Unit]
@@ -281,14 +289,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/software
+        What=10.204.10.20:/software
         Where=/var/srv/software
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-torrents.mount
+    - name: var-srv-torrents.mount
       enabled: true
       contents: |
         [Unit]
@@ -297,14 +305,14 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/torrents
+        What=10.204.10.20:/torrents
         Where=/var/srv/torrents
         Type=nfs4
         Options=defaults,nofail
 
         [Install]
         WantedBy=remote-fs.target
-    - name: srv-tvshows.mount
+    - name: var-srv-tvshows.mount
       enabled: true
       contents: |
         [Unit]
@@ -313,7 +321,7 @@ systemd:
         Wants=network-online.target
 
         [Mount]
-        What=10.204.10.20:/var/srv/tvshows
+        What=10.204.10.20:/tvshows
         Where=/var/srv/tvshows
         Type=nfs4
         Options=defaults,nofail
