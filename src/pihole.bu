@@ -350,6 +350,8 @@ systemd:
 
         [Install]
         WantedBy=default.target
+    - name: podman.socket
+      enabled: true
     - name: beszel-agent.service
       enabled: true
       contents: |
@@ -383,7 +385,9 @@ systemd:
                 -e HUB_URL=http://10.204.10.21:8090 \
         	--tmpfs /tmp \
         	--tmpfs /var/tmp \
+        	--security-opt label=disable \
         	-v /var/containers/beszel_agent:/var/lib/beszel-agent:Z \
+        	-v /run/podman/podman.sock:/var/run/docker.sock:ro \
         	--net=host \
         	--label io.containers.autoupdate=registry \
         	docker.io/henrygd/beszel-agent:latest
