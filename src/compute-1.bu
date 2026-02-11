@@ -125,6 +125,7 @@ storage:
           	--replace \
           	--pull=newer \
           	--name=portainer \
+          	--security-opt label=disable \
           	-d \
           	--network=host \
           	--tmpfs /tmp \
