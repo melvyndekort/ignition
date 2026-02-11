@@ -15,4 +15,4 @@ convert: $(patsubst src/%.bu,dist/%.ign,$(wildcard src/*.bu))
 
 serve: convert
 	@echo "Serving ignition files at http://localhost:80"
-	@podman run --rm -p 80:80 -v $${PWD}/dist:/usr/share/nginx/html:ro nginx:alpine
+	@podman run --rm -p 8000:80 -v $${PWD}/dist:/usr/share/nginx/html:ro nginx:alpine
