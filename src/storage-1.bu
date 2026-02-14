@@ -146,137 +146,33 @@ storage:
 
           [Install]
           WantedBy=timers.target
-    - path: /etc/systemd/system/container-samba.service
+    - path: /etc/systemd/system/portainer-agent.service
       mode: 0644
       contents:
         inline: |
           [Unit]
-          Description=Samba Container
-          After=network-online.target var-srv.mount
-          Wants=network-online.target
-          
-          [Service]
-          Restart=always
-          ExecStartPre=/usr/bin/podman rm -f samba
-          ExecStart=/usr/bin/podman run \
-            --name samba \
-            --hostname storage-1 \
-            -v /var/srv:/host/storage:Z \
-            -v /mnt:/host/mnt:Z \
-            --tmpfs /run/samba \
-            --tmpfs /var/cache/samba \
-            --tmpfs /var/log/samba \
-            -p 137:137/udp \
-            -p 138:138/udp \
-            -p 139:139 \
-            -p 445:445 \
-            -e TZ=Europe/Amsterdam \
-            -e USERID=0 \
-            -e GROUPID=0 \
-            -e NMBD=true \
-            -e RECYCLE=true \
-            -e "SHARE01=audiobooks;/host/storage/audiobooks;yes;no;no" \
-            -e "SHARE02=ebooks;/host/storage/ebooks;yes;no;no" \
-            -e "SHARE03=mnt;/host/mnt;yes;no;no" \
-            -e "SHARE04=movies;/host/storage/movies;yes;no;no" \
-            -e "SHARE05=music;/host/storage/music;yes;no;no" \
-            -e "SHARE06=photos;/host/storage/photos;yes;no;no" \
-            -e "SHARE07=software;/host/storage/software;yes;no;no" \
-            -e "SHARE08=tvshows;/host/storage/tvshows;yes;no;no" \
-            -e "SHARE09=torrents;/host/storage/torrents;yes;no;no" \
-            -e "SHARE10=downloads;/host/storage/downloads;yes;no;no" \
-            --label io.containers.autoupdate=registry \
-            dperson/samba:latest
-          ExecStop=/usr/bin/podman stop -t 10 samba
-          
-          [Install]
-          WantedBy=multi-user.target
-    - path: /etc/systemd/system/container-scheduler.service
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=Scheduler Container
-          After=network-online.target var-srv.mount
-          Wants=network-online.target
-          
-          [Service]
-          Restart=always
-          ExecStartPre=/usr/bin/podman rm -f scheduler
-          ExecStart=/usr/bin/podman run \
-            --name scheduler \
-            -v /var/lib/containers/scheduler:/config:Z \
-            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
-            -e TZ=Europe/Amsterdam \
-            --label io.containers.autoupdate=registry \
-            ghcr.io/melvyndekort/scheduler:latest
-          ExecStop=/usr/bin/podman stop -t 10 scheduler
-          
-          [Install]
-          WantedBy=multi-user.target
-    - path: /etc/systemd/system/container-image-refresher.service
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=Image Refresher Container
-          After=network-online.target podman.socket
-          Wants=network-online.target
-          Requires=podman.socket
-          
-          [Service]
-          Restart=always
-          ExecStartPre=/usr/bin/podman rm -f image-refresher
-          ExecStart=/usr/bin/podman run \
-            --name image-refresher \
-            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
-            -e TZ=Europe/Amsterdam \
-            -e REFRESHER_INTERVAL=7200 \
-            -e REFRESHER_IMAGE1=alpine:latest \
-            -e REFRESHER_IMAGE2=restic/restic:latest \
-            -e REFRESHER_IMAGE3=amazon/aws-cli:latest \
-            -e REFRESHER_IMAGE4=rclone/rclone:latest \
-            -e REFRESHER_IMAGE5=ghcr.io/melvyndekort/internal-dns-sync:latest \
-            -e NTFY_URL=http://ntfy/lmserver \
-            --label io.containers.autoupdate=registry \
-            ghcr.io/melvyndekort/image-refresher:latest
-          ExecStop=/usr/bin/podman stop -t 10 image-refresher
-          
-          [Install]
-          WantedBy=multi-user.target
-    - path: /etc/systemd/system/beszel-agent.service
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=Beszel Agent
+          Description=Portainer Agent
           After=network-online.target
           Wants=network-online.target
 
           [Service]
           Environment=PODMAN_SYSTEMD_UNIT=%n
-          Environment="KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK"
           Restart=always
           TimeoutStopSec=70
           ExecStartPre=/bin/rm -f %t/%n.ctr-id
-          ExecStart=/usr/bin/podman run \
-            --cidfile=%t/%n.ctr-id \
-            --cgroups=no-conmon \
-            --rm \
-            --sdnotify=conmon \
-            --replace \
-            --name beszel-agent \
-            --network host \
+          ExecStart=/usr/bin/podman run \\
+            --cidfile=%t/%n.ctr-id \\
+            --cgroups=no-conmon \\
+            --rm \\
+            --sdnotify=conmon \\
+            --replace \\
             --security-opt label=disable \
-            -v /var/lib/containers/beszel-agent:/var/lib/beszel-agent \
-            -v /var/lib/containers/beszel-socket:/beszel_socket \
-            -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            -e LISTEN=45876 \
-            -e KEY="${KEY}" \
-            -e HUB_URL=http://10.204.10.21:8090 \
-            -e TOKEN=114ec-12f275fe9-17a9d-5934fc7ef \
-            -e EXTRA_FILESYSTEMS=primary \
-            docker.io/henrygd/beszel-agent:latest
+            --name portainer-agent \\
+            -p 9001:9001 \\
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \\
+            -v /var/lib/docker/volumes:/var/lib/docker/volumes \\
+            -v /:/host:ro \\
+            docker.io/portainer/agent:2.33.7
           ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
           ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
           Type=notify
@@ -310,7 +206,7 @@ systemd:
     - name: systemd-resolved.service
       enabled: false
       mask: true
-    - name: var-srv.mount
+    - name: var-srv-storage.mount
       enabled: true
       contents: |
         [Unit]
@@ -318,7 +214,7 @@ systemd:
 
         [Mount]
         What=LABEL=primary
-        Where=/var/srv
+        Where=/var/srv/storage
         Type=btrfs
         Options=defaults,nofail,noatime,autodefrag
 
@@ -330,21 +226,13 @@ systemd:
       enabled: true
     - name: nfs-server.service
       enabled: true
-    - name: btrfs-scrub@var-srv.timer
+    - name: btrfs-scrub@var-srv-storage.timer
       enabled: true
     - name: podman-auto-update.timer
       enabled: true
     - name: systemd-swap.service
       enabled: true
-    - name: container-beszel-agent.service
       enabled: true
-    - name: container-samba.service
-      enabled: true
-    - name: container-scheduler.service
-      enabled: true
-    - name: container-image-refresher.service
-      enabled: true
-    - name: beszel-agent.service
       enabled: true
     - name: podman.socket
       enabled: true

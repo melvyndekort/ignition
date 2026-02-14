@@ -29,7 +29,7 @@ storage:
       mode: 0755
     - path: /var/swap
       mode: 0755
-    - path: /var/lib/portainer
+    - path: /var/srv/portainer
       mode: 0755
   files:
     - path: /etc/hostname
@@ -99,12 +99,12 @@ storage:
           search mdekort.nl
           nameserver 10.204.10.2
           nameserver 10.204.10.1
-    - path: /etc/systemd/system/container-portainer.service
+    - path: /etc/systemd/system/portainer.service
       mode: 0644
       contents:
         inline: |
           [Unit]
-          Description=Podman container-portainer.service
+          Description=Podman portainer.service
           Documentation=man:podman-generate-systemd(1)
           Wants=network-online.target
           After=network-online.target
@@ -130,7 +130,7 @@ storage:
           	--network=host \
           	--tmpfs /tmp \
           	--tmpfs /var/tmp \
-          	-v /var/lib/portainer:/data:Z \
+          	-v /var/srv/portainer:/data:Z \
           	-v /var/run/docker.sock:/var/run/docker.sock:ro \
           	--health-cmd="wget --no-verbose --tries=1 --spider https://localhost:9443/ || exit 1" \
           	--health-interval=30s \
@@ -149,45 +149,6 @@ storage:
 
           [Install]
           WantedBy=default.target
-    - path: /etc/systemd/system/beszel-agent.service
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=Beszel Agent
-          After=network-online.target
-          Wants=network-online.target
-
-          [Service]
-          Environment=PODMAN_SYSTEMD_UNIT=%n
-          Environment="KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK"
-          Restart=always
-          TimeoutStopSec=70
-          ExecStartPre=/bin/rm -f %t/%n.ctr-id
-          ExecStart=/usr/bin/podman run \
-            --cidfile=%t/%n.ctr-id \
-            --cgroups=no-conmon \
-            --rm \
-            --sdnotify=conmon \
-            --replace \
-            --name beszel-agent \
-            --network host \
-            --security-opt label=disable \
-            -v /var/lib/containers/beszel-agent:/var/lib/beszel-agent \
-            -v /var/lib/containers/beszel-socket:/beszel_socket \
-            -v /var/run/docker.sock:/var/run/docker.sock:ro \
-            -e LISTEN=45876 \
-            -e KEY="${KEY}" \
-            -e HUB_URL=http://localhost:8090 \
-            -e TOKEN=e27-5766408e7e8-8179-d3a8b364d \
-            docker.io/henrygd/beszel-agent:latest
-          ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
-          ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
-          Type=notify
-          NotifyAccess=all
-
-          [Install]
-          WantedBy=multi-user.target
     - path: /etc/systemd/system/podman-auto-update.timer
       mode: 0644
       contents:
@@ -373,9 +334,7 @@ systemd:
       mask: true
     - name: docker.service
       enabled: true
-    - name: container-portainer.service
-      enabled: true
-    - name: beszel-agent.service
+    - name: portainer.service
       enabled: true
     - name: podman-auto-update.timer
       enabled: true
