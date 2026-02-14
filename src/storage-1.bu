@@ -167,8 +167,8 @@ storage:
             --sdnotify=conmon \\
             --replace \\
             --security-opt label=disable \
+            --network=host \
             --name portainer-agent \\
-            -p 9001:9001 \\
             -v /var/run/docker.sock:/var/run/docker.sock:ro \\
             -v /var/lib/docker/volumes:/var/lib/docker/volumes \\
             -v /:/host:ro \\
