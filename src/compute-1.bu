@@ -329,6 +329,22 @@ systemd:
 
         [Install]
         WantedBy=remote-fs.target
+    - name: var-srv-storage-calibre.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for calibre
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/calibre
+        Where=/var/srv/storage/calibre
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
     - name: systemd-resolved.service
       enabled: false
       mask: true
