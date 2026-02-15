@@ -84,26 +84,26 @@ storage:
       contents:
         inline: |
           # NFSv4 pseudo-root
-          /var/srv 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
+          /var/srv/storage 10.204.10.21(rw,sync,no_subtree_check,fsid=0,no_root_squash)
+          /var/srv/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
           
-          # Write access for compute-1 server
-          /var/srv/audiobooks 10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/downloads  10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/ebooks     10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/movies     10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/music      10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/photos     10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/software   10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/torrents   10.204.10.21(rw,sync,no_subtree_check)
-          /var/srv/tvshows    10.204.10.21(rw,sync,no_subtree_check)
+          # Write access for compute-1 server (no squashing - preserve UIDs/GIDs)
+          /var/srv/storage/audiobooks 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/downloads  10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/ebooks     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/movies     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/music      10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/photos     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/software   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/torrents   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           
-          # Read-only access for Kodi clients
-          /var/srv/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/srv/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/srv/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/srv/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/srv/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
-          /var/srv/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          # Read-only access for Kodi clients (squash all to 8888:8888)
+          /var/srv/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/storage/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/storage/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/storage/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/storage/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
     - path: /etc/systemd/system/docker.socket.d/tcp.conf
       mode: 0644
       contents:
