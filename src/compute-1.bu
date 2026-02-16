@@ -342,6 +342,22 @@ systemd:
 
         [Install]
         WantedBy=remote-fs.target
+    - name: var-srv-backups.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=NFS mount for backups
+        After=network-online.target
+        Wants=network-online.target
+
+        [Mount]
+        What=10.204.10.20:/backups
+        Where=/var/srv/backups
+        Type=nfs4
+        Options=defaults,nofail
+
+        [Install]
+        WantedBy=remote-fs.target
     - name: systemd-resolved.service
       enabled: false
       mask: true

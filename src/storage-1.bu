@@ -98,6 +98,7 @@ storage:
           /var/srv/storage/torrents   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/calibre    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/backups    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           
           # Read-only access for Kodi clients (squash all to 8888:8888)
           /var/srv/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)

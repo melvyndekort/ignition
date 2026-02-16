@@ -1,0 +1,385 @@
+variant: fcos
+version: 1.5.0
+passwd:
+  users:
+    - name: core
+      password_hash: "$6$ap2KrVdWE6eHy/6B$vMtfp2m460/zaxgWtwKir7BssW0huVqxeVmIzs6cfD0B7iZOC7fFLNPIjKl0q1cxY1RUQJDgm5A.KuWGmEC1P0"
+      ssh_authorized_keys:
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4= yubikey-main
+        - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
+storage:
+  directories:
+    - path: /srv
+      mode: 0755
+      overwrite: true
+    - path: /var/swap
+      mode: 0755
+  files:
+    - path: /etc/hostname
+      mode: 0644
+      contents:
+        inline: storage-1
+    - path: /etc/zincati/config.d/55-updates-strategy.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          strategy = "periodic"
+          [[updates.periodic.window]]
+          days = [ "Sat", "Sun" ]
+          start_time = "06:00"
+          length_minutes = 60
+    - path: /etc/systemd/journald.conf.d/volatile.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Journal]
+          Storage=volatile
+          RuntimeMaxUse=512M
+          RuntimeMaxFileSize=64M
+          RuntimeMaxFiles=8
+    - path: /etc/systemd/swap.conf
+      mode: 0644
+      contents:
+        inline: |
+          swapfc_enabled=1
+          swapfc_size=4G
+          swapfc_path=/var/swap/
+    - path: /etc/smartd.conf
+      mode: 0644
+      contents:
+        inline: |
+          DEVICESCAN -a -o on -S on -n standby,q -s (S/../.././02|L/../../6/03) -W 4,35,40
+    - path: /etc/NetworkManager/conf.d/ipv6-stable.conf
+      mode: 0644
+      contents:
+        inline: |
+          [connection]
+          ipv6.ip6-privacy=0
+          ipv6.addr-gen-mode=stable-privacy
+    - path: /etc/NetworkManager/system-connections/Wired connection 2.nmconnection
+      mode: 0600
+      contents:
+        inline: |
+          [connection]
+          id=Wired connection 2
+          type=ethernet
+          autoconnect=true
+
+          [ethernet]
+          
+          [ipv4]
+          method=manual
+          address1=10.204.10.20/24
+          gateway=10.204.10.1
+          dns=10.204.10.1;
+          
+          [ipv6]
+          method=auto
+          addr-gen-mode=stable-privacy
+          ip6-privacy=0
+          address1=2a02:a45b:51f6:10::20/64
+    - path: /etc/exports
+      mode: 0644
+      contents:
+        inline: |
+          # NFSv4 pseudo-root
+          /var/srv 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
+          
+          # Write access for compute-1 server
+          /var/srv/audiobooks 10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/downloads  10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/ebooks     10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/movies     10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/music      10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/photos     10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/software   10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/torrents   10.204.10.21(rw,sync,no_subtree_check)
+          /var/srv/tvshows    10.204.10.21(rw,sync,no_subtree_check)
+          
+          # Read-only access for Kodi clients
+          /var/srv/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/downloads  10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/movies     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          /var/srv/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+    - path: /etc/systemd/system/docker.socket.d/tcp.conf
+      mode: 0644
+      contents:
+        inline: |
+          [Socket]
+          ListenStream=2375
+    - path: /etc/systemd/system/btrfs-scrub@.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Btrfs scrub on %i
+          
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/sbin/btrfs scrub start -B %i
+    - path: /etc/systemd/system/btrfs-scrub@.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Weekly Btrfs scrub on %i
+          
+          [Timer]
+          OnCalendar=weekly
+          Persistent=true
+          
+          [Install]
+          WantedBy=timers.target
+    - path: /etc/systemd/system/podman-auto-update.timer
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Podman auto-update timer
+
+          [Timer]
+          OnCalendar=daily
+          Persistent=true
+
+          [Install]
+          WantedBy=timers.target
+    - path: /etc/systemd/system/container-samba.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Samba Container
+          After=network-online.target var-srv-storage.mount
+          Wants=network-online.target
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f samba
+          ExecStart=/usr/bin/podman run \
+            --name samba \
+            --hostname storage-1 \
+            -v /var/srv:/host/storage:Z \
+            -v /mnt:/host/mnt:Z \
+            --tmpfs /run/samba \
+            --tmpfs /var/cache/samba \
+            --tmpfs /var/log/samba \
+            -p 137:137/udp \
+            -p 138:138/udp \
+            -p 139:139 \
+            -p 445:445 \
+            -e TZ=Europe/Amsterdam \
+            -e USERID=0 \
+            -e GROUPID=0 \
+            -e NMBD=true \
+            -e RECYCLE=true \
+            -e "SHARE01=audiobooks;/host/storage/audiobooks;yes;no;no" \
+            -e "SHARE02=ebooks;/host/storage/ebooks;yes;no;no" \
+            -e "SHARE03=mnt;/host/mnt;yes;no;no" \
+            -e "SHARE04=movies;/host/storage/movies;yes;no;no" \
+            -e "SHARE05=music;/host/storage/music;yes;no;no" \
+            -e "SHARE06=photos;/host/storage/photos;yes;no;no" \
+            -e "SHARE07=software;/host/storage/software;yes;no;no" \
+            -e "SHARE08=tvshows;/host/storage/tvshows;yes;no;no" \
+            -e "SHARE09=torrents;/host/storage/torrents;yes;no;no" \
+            -e "SHARE10=downloads;/host/storage/downloads;yes;no;no" \
+            --label io.containers.autoupdate=registry \
+            dperson/samba:latest
+          ExecStop=/usr/bin/podman stop -t 10 samba
+          
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/container-scheduler.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Scheduler Container
+          After=network-online.target var-srv-storage.mount
+          Wants=network-online.target
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f scheduler
+          ExecStart=/usr/bin/podman run \
+            --name scheduler \
+            -v /var/srv/storage/docker/scheduler:/config:Z \
+            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
+            -e TZ=Europe/Amsterdam \
+            --label io.containers.autoupdate=registry \
+            ghcr.io/melvyndekort/scheduler:latest
+          ExecStop=/usr/bin/podman stop -t 10 scheduler
+          
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/container-image-refresher.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Image Refresher Container
+          After=network-online.target podman.socket
+          Wants=network-online.target
+          Requires=podman.socket
+          
+          [Service]
+          Restart=always
+          ExecStartPre=/usr/bin/podman rm -f image-refresher
+          ExecStart=/usr/bin/podman run \
+            --name image-refresher \
+            -v /run/podman/podman.sock:/var/run/docker.sock:ro \
+            -e TZ=Europe/Amsterdam \
+            -e REFRESHER_INTERVAL=7200 \
+            -e REFRESHER_IMAGE1=alpine:latest \
+            -e REFRESHER_IMAGE2=restic/restic:latest \
+            -e REFRESHER_IMAGE3=amazon/aws-cli:latest \
+            -e REFRESHER_IMAGE4=rclone/rclone:latest \
+            -e REFRESHER_IMAGE5=ghcr.io/melvyndekort/internal-dns-sync:latest \
+            -e NTFY_URL=http://ntfy/lmserver \
+            --label io.containers.autoupdate=registry \
+            ghcr.io/melvyndekort/image-refresher:latest
+          ExecStop=/usr/bin/podman stop -t 10 image-refresher
+          
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/beszel-agent.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Beszel Agent
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Environment=PODMAN_SYSTEMD_UNIT=%n
+          Environment="KEY=ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJd2l4q3It2Mw9xaQZqzVbbT/whLaJ5nlxIdKV39mXdK"
+          Restart=always
+          TimeoutStopSec=70
+          ExecStartPre=/bin/rm -f %t/%n.ctr-id
+          ExecStart=/usr/bin/podman run \
+            --cidfile=%t/%n.ctr-id \
+            --cgroups=no-conmon \
+            --rm \
+            --sdnotify=conmon \
+            --replace \
+            --name beszel-agent \
+            --network host \
+            --security-opt label=disable \
+            -v /var/srv/storage/docker/beszel-agent:/var/lib/beszel-agent \
+            -v /var/srv/storage/docker/beszel-socket:/beszel_socket \
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \
+            -e LISTEN=45876 \
+            -e KEY="${KEY}" \
+            -e HUB_URL=http://10.204.10.21:8090 \
+            -e TOKEN=114ec-12f275fe9-17a9d-5934fc7ef \
+            -e EXTRA_FILESYSTEMS=primary \
+            docker.io/henrygd/beszel-agent:latest
+          ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+          ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+          Type=notify
+          NotifyAccess=all
+
+          [Install]
+          WantedBy=multi-user.target
+    - path: /etc/systemd/system/portainer-agent.service
+      mode: 0644
+      contents:
+        inline: |
+          [Unit]
+          Description=Portainer Agent
+          After=network-online.target
+          Wants=network-online.target
+
+          [Service]
+          Environment=PODMAN_SYSTEMD_UNIT=%n
+          Restart=always
+          TimeoutStopSec=70
+          ExecStartPre=/bin/rm -f %t/%n.ctr-id
+          ExecStart=/usr/bin/podman run \\
+            --cidfile=%t/%n.ctr-id \\
+            --cgroups=no-conmon \\
+            --rm \\
+            --sdnotify=conmon \\
+            --replace \\
+            --name portainer-agent \\
+            -p 9001:9001 \\
+            -v /var/run/docker.sock:/var/run/docker.sock:ro \\
+            -v /var/lib/docker/volumes:/var/lib/docker/volumes:z \\
+            -v /:/host:ro \\
+            docker.io/portainer/agent:2.33.7
+          ExecStop=/usr/bin/podman stop --ignore --cidfile=%t/%n.ctr-id
+          ExecStopPost=/usr/bin/podman rm -f --ignore --cidfile=%t/%n.ctr-id
+          Type=notify
+          NotifyAccess=all
+
+          [Install]
+          WantedBy=multi-user.target
+  links:
+    - path: /etc/localtime
+      target: /usr/share/zoneinfo/Europe/Amsterdam
+systemd:
+  units:
+    - name: rpm-ostree-install-nfs-utils.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer nfs-utils with rpm-ostree
+        Wants=network-online.target
+        After=network-online.target
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive nfs-utils
+        ExecStart=/bin/touch /var/lib/%N.stamp
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: systemd-resolved.service
+      enabled: false
+      mask: true
+    - name: var-srv-storage.mount
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Mount primary storage directory
+
+        [Mount]
+        What=LABEL=primary
+        Where=/var/srv/storage
+        Type=btrfs
+        Options=defaults,nofail,noatime,autodefrag
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: smartd.service
+      enabled: true
+    - name: zincati.service
+      enabled: true
+    - name: nfs-server.service
+      enabled: true
+    - name: btrfs-scrub@var-srv-storage.timer
+      enabled: true
+    - name: podman-auto-update.timer
+      enabled: true
+    - name: systemd-swap.service
+      enabled: true
+    - name: container-beszel-agent.service
+      enabled: true
+    - name: container-samba.service
+      enabled: true
+    - name: container-scheduler.service
+      enabled: true
+    - name: container-image-refresher.service
+      enabled: true
+    - name: beszel-agent.service
+    - name: portainer-agent.service
+      enabled: true
+      enabled: true
+    - name: podman.socket
+      enabled: true
