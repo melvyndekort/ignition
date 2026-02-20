@@ -9,27 +9,29 @@ passwd:
         - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA== yubikey-backup
 storage:
   directories:
-    - path: /var/srv/audiobooks
+    - path: /var/srv/storage/audiobooks
       mode: 0755
-    - path: /var/srv/downloads
+    - path: /var/srv/storage/backups
       mode: 0755
-    - path: /var/srv/ebooks
+    - path: /var/srv/storage/downloads
       mode: 0755
-    - path: /var/srv/movies
+    - path: /var/srv/storage/ebooks
       mode: 0755
-    - path: /var/srv/music
+    - path: /var/srv/storage/movies
       mode: 0755
-    - path: /var/srv/photos
+    - path: /var/srv/storage/music
       mode: 0755
-    - path: /var/srv/software
+    - path: /var/srv/storage/photos
       mode: 0755
-    - path: /var/srv/torrents
+    - path: /var/srv/storage/software
       mode: 0755
-    - path: /var/srv/tvshows
+    - path: /var/srv/storage/torrents
+      mode: 0755
+    - path: /var/srv/storage/tvshows
       mode: 0755
     - path: /var/swap
       mode: 0755
-    - path: /var/srv/portainer
+    - path: /var/srv/apps/portainer
       mode: 0755
   files:
     - path: /etc/hostname
@@ -130,7 +132,7 @@ storage:
           	--network=host \
           	--tmpfs /tmp \
           	--tmpfs /var/tmp \
-          	-v /var/srv/portainer:/data:Z \
+          	-v /var/srv/apps/portainer:/data:Z \
           	-v /var/run/docker.sock:/var/run/docker.sock:ro \
           	--label io.containers.autoupdate=registry \
           	docker.io/portainer/portainer-ee:alpine
@@ -342,7 +344,7 @@ systemd:
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-srv-backups.mount
+    - name: var-srv-storage-backups.mount
       enabled: true
       contents: |
         [Unit]
@@ -352,7 +354,7 @@ systemd:
 
         [Mount]
         What=10.204.10.20:/backups
-        Where=/var/srv/backups
+        Where=/var/srv/storage/backups
         Type=nfs4
         Options=defaults,nofail
 
