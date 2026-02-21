@@ -83,13 +83,12 @@ storage:
       mode: 0644
       contents:
         inline: |
-          # NFSv4 pseudo-root
+          # NVSv4 pseudo-root
           /var/srv/storage 10.204.10.21(rw,sync,no_subtree_check,fsid=0,no_root_squash)
           /var/srv/storage 10.204.10.0/24(ro,sync,no_subtree_check,fsid=0)
           
           # Write access for compute-1 server (no squashing - preserve UIDs/GIDs)
           /var/srv/storage/audiobooks 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
-          /var/srv/storage/downloads  10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/ebooks     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/movies     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/music      10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
@@ -97,8 +96,11 @@ storage:
           /var/srv/storage/software   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/torrents   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
-          /var/srv/storage/calibre    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
-          /var/srv/storage/backups    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          # 10.204.10.21 = compute-1 IP
+          # rw = read/write
+          # sync = ensure writes are committed safely
+          # no_subtree_check = improves reliability
+          # no_root_squash = preserve root and all UIDs/GIDs
           
           # Read-only access for Kodi clients (squash all to 8888:8888)
           /var/srv/storage/audiobooks 10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
@@ -106,6 +108,15 @@ storage:
           /var/srv/storage/music      10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
           /var/srv/storage/photos     10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
           /var/srv/storage/tvshows    10.204.10.0/24(ro,sync,no_subtree_check,all_squash,insecure,anonuid=8888,anongid=8888)
+          # ro = read-only
+          # sync = ensure writes are committed safely
+          # no_subtree_check = improves reliability
+          # all_squash = map all UIDs and GIDs to anonymous user
+          # insecure = allow unprivileged ports, non-root ports
+          # anonuid = specify uid of anonymous user
+          # anongid = specify gid of anonymous user
+          /var/srv/storage/calibre 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
+          /var/srv/storage/backups 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
     - path: /etc/systemd/system/docker.socket.d/tcp.conf
       mode: 0644
       contents:

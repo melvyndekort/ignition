@@ -13,8 +13,6 @@ storage:
       mode: 0755
     - path: /var/srv/storage/backups
       mode: 0755
-    - path: /var/srv/storage/downloads
-      mode: 0755
     - path: /var/srv/storage/ebooks
       mode: 0755
     - path: /var/srv/storage/movies
@@ -195,22 +193,6 @@ systemd:
         [Mount]
         What=10.204.10.20:/audiobooks
         Where=/var/srv/storage/audiobooks
-        Type=nfs4
-        Options=defaults,nofail
-
-        [Install]
-        WantedBy=remote-fs.target
-    - name: var-srv-storage-downloads.mount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=NFS mount for downloads
-        After=network-online.target
-        Wants=network-online.target
-
-        [Mount]
-        What=10.204.10.20:/downloads
-        Where=/var/srv/storage/downloads
         Type=nfs4
         Options=defaults,nofail
 
