@@ -23,8 +23,6 @@ storage:
       mode: 0755
     - path: /var/srv/storage/software
       mode: 0755
-    - path: /var/srv/storage/torrents
-      mode: 0755
     - path: /var/srv/storage/tvshows
       mode: 0755
     - path: /var/swap
@@ -278,22 +276,6 @@ systemd:
 
         [Install]
         WantedBy=remote-fs.target
-    - name: var-srv-storage-torrents.mount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=NFS mount for torrents
-        After=network-online.target
-        Wants=network-online.target
-
-        [Mount]
-        What=10.204.10.20:/torrents
-        Where=/var/srv/storage/torrents
-        Type=nfs4
-        Options=defaults,nofail
-
-        [Install]
-        WantedBy=remote-fs.target
     - name: var-srv-storage-tvshows.mount
       enabled: true
       contents: |
@@ -305,22 +287,6 @@ systemd:
         [Mount]
         What=10.204.10.20:/tvshows
         Where=/var/srv/storage/tvshows
-        Type=nfs4
-        Options=defaults,nofail
-
-        [Install]
-        WantedBy=remote-fs.target
-    - name: var-srv-storage-calibre.mount
-      enabled: true
-      contents: |
-        [Unit]
-        Description=NFS mount for calibre
-        After=network-online.target
-        Wants=network-online.target
-
-        [Mount]
-        What=10.204.10.20:/calibre
-        Where=/var/srv/storage/calibre
         Type=nfs4
         Options=defaults,nofail
 

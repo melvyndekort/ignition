@@ -94,7 +94,6 @@ storage:
           /var/srv/storage/music      10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/photos     10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/software   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
-          /var/srv/storage/torrents   10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/tvshows    10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           # 10.204.10.21 = compute-1 IP
           # rw = read/write
@@ -115,7 +114,6 @@ storage:
           # insecure = allow unprivileged ports, non-root ports
           # anonuid = specify uid of anonymous user
           # anongid = specify gid of anonymous user
-          /var/srv/storage/calibre 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
           /var/srv/storage/backups 10.204.10.21(rw,sync,no_subtree_check,no_root_squash)
     - path: /etc/systemd/system/docker.socket.d/tcp.conf
       mode: 0644
