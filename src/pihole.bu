@@ -140,6 +140,10 @@ storage:
 
               # addresses from the IP range that are allowed to connect to the resolver
               access-control: 0.0.0.0/0 allow
+
+              # config for monitoring purposes
+              local-zone: "unbound-test.local." static
+              local-data: "unbound-test.local. IN A 192.0.2.1"
     - path: /etc/systemd/zram-generator.conf
       contents:
         inline: |
