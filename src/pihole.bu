@@ -176,6 +176,7 @@ storage:
     - { path: /var/containers/beszel_agent, mode: 0755, user: {name: root}, group: {name: root} }
     - { path: /var/containers/keepalived, mode: 0755, user: {name: root}, group: {name: root} }
     - { path: /var/containers/caddy/data, mode: 0755, user: {name: root}, group: {name: root} }
+    - { path: /var/containers/zigbee2mqtt, mode: 0755, user: {name: root}, group: {name: root} }
   links:
     - path: /etc/localtime
       target: /usr/share/zoneinfo/Europe/Amsterdam
@@ -499,6 +500,51 @@ systemd:
         	-f \
         	--ignore -t 10 \
         	--cidfile=/run/%N.ctr-id
+        Type=notify
+        NotifyAccess=all
+
+        [Install]
+        WantedBy=default.target
+
+    - name: zigbee2mqtt.service
+      enabled: false
+      contents: |
+        [Unit]
+        Description=Podman zigbee2mqtt.service
+        Documentation=man:podman-generate-systemd(1)
+        Wants=network-online.target
+        After=network-online.target
+        RequiresMountsFor=%t/containers
+
+        [Service]
+        Environment=PODMAN_SYSTEMD_UNIT=%n
+        Restart=always
+        StartLimitIntervalSec=0
+        TimeoutStopSec=70
+        ExecStartPre=/bin/rm \
+        	-f %t/%n.ctr-id
+        ExecStart=/usr/bin/podman run \
+        	--cidfile=%t/%n.ctr-id \
+        	--cgroups=no-conmon \
+        	--rm \
+        	--sdnotify=conmon \
+        	--replace \
+        	--pull=newer \
+        	--name=zigbee2mqtt \
+        	-d \
+        	-e TZ=Europe/Amsterdam \
+        	--device=/dev/ttyUSB0:/dev/ttyUSB0 \
+        	-v /var/containers/zigbee2mqtt:/app/data:Z \
+        	--net=host \
+        	--label io.containers.autoupdate=registry \
+        	docker.io/koenkk/zigbee2mqtt:latest
+        ExecStop=/usr/bin/podman stop \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
+        ExecStopPost=/usr/bin/podman rm \
+        	-f \
+        	--ignore -t 10 \
+        	--cidfile=%t/%n.ctr-id
         Type=notify
         NotifyAccess=all
 
