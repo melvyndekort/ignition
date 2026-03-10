@@ -15,6 +15,11 @@ storage:
     - path: /var/swap
       mode: 0755
   files:
+    - path: /etc/ssh/sshd_config.d/10-no-passwords.conf
+      mode: 0644
+      contents:
+        inline: |
+          PasswordAuthentication no
     - path: /etc/hostname
       mode: 0644
       contents:
@@ -242,8 +247,6 @@ systemd:
     - name: podman-auto-update.timer
       enabled: true
     - name: systemd-swap.service
-      enabled: true
-      enabled: true
       enabled: true
     - name: podman.socket
       enabled: true

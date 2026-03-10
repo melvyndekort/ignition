@@ -30,6 +30,11 @@ storage:
     - path: /var/srv/apps/portainer
       mode: 0755
   files:
+    - path: /etc/ssh/sshd_config.d/10-no-passwords.conf
+      mode: 0644
+      contents:
+        inline: |
+          PasswordAuthentication no
     - path: /etc/hostname
       mode: 0644
       contents:
