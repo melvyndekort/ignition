@@ -35,6 +35,23 @@ storage:
       contents:
         inline: |
           PasswordAuthentication no
+    - path: /etc/chrony.conf
+      mode: 0644
+      overwrite: true
+      contents:
+        inline: |
+          # Use local NTP server (router)
+          server 10.204.10.1 iburst
+          
+          # Use NTP servers from DHCP as fallback
+          sourcedir /run/chrony-dhcp
+          
+          driftfile /var/lib/chrony/drift
+          makestep 1.0 3
+          rtcsync
+          ntsdumpdir /var/lib/chrony
+          leapseclist /usr/share/zoneinfo/leap-seconds.list
+          logdir /var/log/chrony
     - path: /etc/hostname
       mode: 0644
       contents:
