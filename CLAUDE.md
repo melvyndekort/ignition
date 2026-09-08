@@ -1,6 +1,6 @@
 # ignition
 
-> For global standards, way-of-workings, and pre-commit checklist, see `~/.kiro/steering/behavior.md`
+> For global standards, way-of-workings, and pre-commit checklist, see `~/.claude/CLAUDE.md`
 
 ## Role
 
@@ -25,4 +25,4 @@ Butane configurations for provisioning Fedora IoT servers. Butane YAML is conver
 ## Related Repositories
 
 - `~/src/melvyndekort/homelab` — Docker Compose stacks that run on the provisioned servers
-- `~/src/melvyndekort/network-documentation` — Documents the servers this provisions
+- `~/Sync/obsidian/Tech/Homelab` — Documents the servers this provisions
