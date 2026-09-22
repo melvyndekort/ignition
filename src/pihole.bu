@@ -10,7 +10,7 @@ passwd:
       - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKnkbTLUs/05Mgxj8ZYYWKCSh4GT8+8uDZHGAwufnTEcAAAAEHNzaDp5dWJpa2V5LW1haW4=
       - sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIQVG9L6TDnNvbZ3Hc+PoPJGf2VqxnxwgVWObnEAMzZBAAAAEnNzaDp5dWJpa2V5LWJhY2t1cA==
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4S4BBp9jA7SGT6GETBXxCTh2py4wG264ZT/BJctURL pihole-backup
-      - from="2a05:d018:15b6:b400::/56",no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKt7tU/VElM1ME4CjDRzMzyBwGmnTKxAT1rZ9d3IeV5H hermes-agent@fargate-2026-09-22
+      - from="2a05:d018:15b6:b400::/56,10.204.10.21",no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKt7tU/VElM1ME4CjDRzMzyBwGmnTKxAT1rZ9d3IeV5H hermes-agent@fargate-2026-09-22
 
 storage:
   files:
