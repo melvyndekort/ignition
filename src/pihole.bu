@@ -199,7 +199,7 @@ storage:
               kickolduser: true
               telnet-brk-on-sync: true
             connector: serialdev,
-                       /dev/ttyUSB1,
+                       /dev/ttyP1,
                        115200n81,local
     - path: /var/containers/caddy/Caddyfile
       mode: 0644
@@ -604,7 +604,7 @@ systemd:
         WantedBy=default.target
 
     - name: ser2net.service
-      enabled: false
+      enabled: true
       contents: |
         [Unit]
         Description=Podman ser2net.service
@@ -630,7 +630,7 @@ systemd:
         	--name=ser2net \
         	-d \
         	-e TZ=Europe/Amsterdam \
-        	--device=/dev/ttyUSB1:/dev/ttyUSB1 \
+        	--device=/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_AUAMFCKT-if00-port0:/dev/ttyP1 \
         	-v /var/containers/ser2net/ser2net.yaml:/etc/ser2net/ser2net.yaml:Z \
         	--net=host \
         	--label io.containers.autoupdate=registry \
