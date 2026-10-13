@@ -358,6 +358,7 @@ systemd:
         Type=oneshot
         RemainAfterExit=yes
         ExecStart=/usr/bin/firewall-cmd --permanent --add-port=53/tcp --add-port=53/udp --add-port=80/tcp --add-port=443/tcp --add-port=60123/tcp
+        ExecStart=/usr/bin/firewall-cmd --permanent --add-rich-rule='rule family=ipv4 source address=10.204.10.21 port port=2001 protocol=tcp accept'
         ExecStart=/usr/bin/firewall-cmd --reload
 
         [Install]
