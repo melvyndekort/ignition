@@ -56,6 +56,11 @@ storage:
           OnCalendar=
           OnCalendar=Sat,Sun 04:00
           RandomizedDelaySec=7200
+    - path: /etc/systemd/system.conf.d/watchdog.conf
+      contents:
+        inline: |
+          [Manager]
+          RuntimeWatchdogSec=15
     - path: /etc/systemd/journald.conf.d/volatile.conf
       contents:
         inline: |
