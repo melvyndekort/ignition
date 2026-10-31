@@ -591,7 +591,7 @@ systemd:
         	--name=zigbee2mqtt \
         	-d \
         	-e TZ=Europe/Amsterdam \
-        	--device=/dev/ttyUSB0:/dev/ttyUSB0 \
+        	--device=/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0edf3ae3598bef11a30a20ccef8776e9-if00-port0:/dev/ttyUSB0 \
         	-v /var/containers/zigbee2mqtt:/app/data:Z \
         	--net=host \
         	--label io.containers.autoupdate=registry \
